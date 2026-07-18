@@ -433,6 +433,20 @@ with two constants fit to the verified range. It is documented in
 a one-day error matters** (due dates, legal deadlines); do use them for planning
 and display, and replace them with verified rows the moment they publish.
 
+**A second source, if you prefer it.** `bikram-sambat` (MIT) ships its own table
+to 2199 BS. Install `django-bikram[bikram-sambat]` and use it in place of the
+predictor:
+
+```python
+from django_bikram.sources import bikram_sambat_table
+from django_bikram.calendar_data import install_provisional
+install_provisional(bikram_sambat_table(through_year=2150))
+```
+
+Be clear-eyed: this is still **one unverified source**, no more authoritative
+than the predictor — they disagree on every year past 2083, and neither is the
+official Panchanga. It is offered only so you can choose which best-guess to run.
+
 To silence or harden the warning globally:
 
 ```python

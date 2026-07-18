@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `django_bikram.sources.bikram_sambat_table()` — reads the MIT-licensed
+  `bikram-sambat` table as an *alternative* provisional source past the verified
+  range, for callers who prefer it to the built-in predictor. Opt-in extra:
+  `pip install django-bikram[bikram-sambat]`. Still single-source and unverified.
+- Django 6.0 support: tested in CI and added to the classifiers.
+
+### Fixed
+
+- `mypy` now passes on the whole package under Django 6.0 without stubs (typed
+  the form widget's context; marked the DRF field's always-raising paths
+  terminal). Added an English `docs/quickstart.md` alongside the Nepali one.
+
 ## [0.1.0] - 2026-07-18
 
 Initial release.

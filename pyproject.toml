@@ -39,9 +39,13 @@ dependencies = []
 [project.optional-dependencies]
 django = ["Django>=4.2"]
 drf = ["Django>=4.2", "djangorestframework>=3.14"]
+# Opt-in: lets django_bikram.sources.bikram_sambat_table() read bikram-sambat's
+# table as an alternative (unverified) provisional source past the verified range.
+bikram-sambat = ["bikram-sambat>=0.2"]
 dev = [
     "Django>=4.2",
     "djangorestframework>=3.14",
+    "bikram-sambat>=0.2",
     "pytest>=7.4",
     "pytest-django>=4.7",
     "mypy>=1.8",
@@ -89,7 +93,7 @@ warn_unreachable = true
 disallow_subclassing_any = false
 
 [[tool.mypy.overrides]]
-module = ["django.*", "rest_framework.*"]
+module = ["django.*", "rest_framework.*", "bikram_sambat.*"]
 ignore_missing_imports = true
 
 # Our model/serializer fields subclass Django/DRF classes that arrive as `Any`
