@@ -10,7 +10,7 @@ readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
 keywords = ["bikram sambat", "nepali", "nepal", "date", "calendar", "django", "bs", "ad"]
-authors = [{ name = "django-bikram contributors" }]
+authors = [{ name = "Anish Gharti", email = "anishbhimgc@gmail.com" }]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Web Environment",
@@ -48,11 +48,11 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/example/django-bikram"
-Documentation = "https://github.com/example/django-bikram#readme"
-Source = "https://github.com/example/django-bikram"
-Changelog = "https://github.com/example/django-bikram/blob/main/CHANGELOG.md"
-Issues = "https://github.com/example/django-bikram/issues"
+Homepage = "https://github.com/anishbhimgc/django-bikram"
+Documentation = "https://github.com/anishbhimgc/django-bikram#readme"
+Source = "https://github.com/anishbhimgc/django-bikram"
+Changelog = "https://github.com/anishbhimgc/django-bikram/blob/main/CHANGELOG.md"
+Issues = "https://github.com/anishbhimgc/django-bikram/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["django_bikram"]
@@ -66,6 +66,7 @@ include = [
     "/README.ne.md",
     "/LICENSE",
     "/CHANGELOG.md",
+    "/CONTRIBUTING.md",
     "/pyproject.toml",
 ]
 

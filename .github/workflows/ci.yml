@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: lint + types + doctests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e ".[dev]"
+      - name: Ruff
+        run: ruff check django_bikram/
+      - name: Mypy (strict)
+        run: mypy django_bikram/
+      - name: Doctests
+        run: >
+          pytest --doctest-modules
+          django_bikram/date.py django_bikram/convert.py
+          django_bikram/formatting.py django_bikram/exceptions.py
+          django_bikram/calendar_data.py django_bikram/predict.py -q
+
+  test:
+    name: py${{ matrix.python-version }} · Django ${{ matrix.django }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        django: ["4.2", "5.1", "5.2"]
+        exclude:
+          # Django 4.2 does not officially support Python 3.13.
+          - python-version: "3.13"
+            django: "4.2"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e ".[dev]"
+      - name: Pin Django ${{ matrix.django }}
+        run: pip install "Django~=${{ matrix.django }}.0"
+      - name: Show versions
+        run: python -c "import django, rest_framework, sys; print(sys.version); print('Django', django.__version__, 'DRF', rest_framework.VERSION)"
+      - name: Test
+        run: pytest -q
+
+  build:
+    name: build + metadata
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install build twine
+      - run: python -m build
+      - name: Validate metadata (README renders on PyPI, etc.)
+        run: twine check --strict dist/*

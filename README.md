@@ -1,5 +1,12 @@
 # django-bikram
 
+[![CI](https://github.com/anishbhimgc/django-bikram/actions/workflows/ci.yml/badge.svg)](https://github.com/anishbhimgc/django-bikram/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/django-bikram)](https://pypi.org/project/django-bikram/)
+[![Python versions](https://img.shields.io/pypi/pyversions/django-bikram)](https://pypi.org/project/django-bikram/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Types: mypy strict](https://img.shields.io/badge/types-mypy%20strict-blue)](https://mypy-lang.org/)
+[![Lint: ruff](https://img.shields.io/badge/lint-ruff-261230)](https://github.com/astral-sh/ruff)
+
 Bikram Sambat (Nepali) dates for Python, with first-class Django and DRF
 integration.
 
