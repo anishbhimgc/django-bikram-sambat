@@ -39,7 +39,11 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, Literal
 
-from .calendar_data import BS_MONTH_DAYS, MAX_BS_YEAR, MIN_BS_YEAR
+from .calendar_data import (
+    BS_MONTH_DAYS,
+    VERIFIED_MAX_BS_YEAR,
+    VERIFIED_MIN_BS_YEAR,
+)
 from .exceptions import InvalidBSDate
 
 if TYPE_CHECKING:
@@ -111,17 +115,6 @@ WEEKDAY_ABBRS: dict[str, tuple[str, ...]] = {
 _LANGS = ("en", "ne")
 _NUMERALS = ("ascii", "devanagari")
 
-
-def _reload_from_calendar_data() -> None:
-    """Refresh the year bounds used by ``%y`` resolution after a provisional extend.
-
-    Called by :func:`django_bikram.calendar_data.install_provisional`.
-    """
-    global MIN_BS_YEAR, MAX_BS_YEAR
-    from . import calendar_data as cd
-
-    MIN_BS_YEAR = cd.MIN_BS_YEAR
-    MAX_BS_YEAR = cd.MAX_BS_YEAR
 
 # Matches a directive: '%', an optional '-' padding suppressor, then a letter
 # or a literal '%'.
@@ -285,9 +278,13 @@ def _resolve_two_digit_year(value: int) -> int:
     tie is broken toward the **20xx** century, because 19xx BS ended in 1943 AD
     and essentially no live data uses it.
 
-    The preference only applies when it can: 84-99 resolve to 19xx, since 2084+
+    The preference only applies when it can: 85-99 resolve to 19xx, since 2085+
     is outside the verified range. Values that land nowhere raise instead of
     guessing.
+
+    Resolution is pinned to the **verified** range, not the working range, so
+    installing provisional years never silently changes what a two-digit year
+    means.
 
     Prefer ``%Y`` in any format you control. This exists for parsing input you
     do not.
@@ -303,11 +300,11 @@ def _resolve_two_digit_year(value: int) -> int:
     """
     for century in (2000, 1900):
         candidate = century + value
-        if MIN_BS_YEAR <= candidate <= MAX_BS_YEAR:
+        if VERIFIED_MIN_BS_YEAR <= candidate <= VERIFIED_MAX_BS_YEAR:
             return candidate
     raise InvalidBSDate(
         f"two-digit year {value:02d} does not map into the verified range "
-        f"{MIN_BS_YEAR}..{MAX_BS_YEAR}; use %Y instead"
+        f"{VERIFIED_MIN_BS_YEAR}..{VERIFIED_MAX_BS_YEAR}; use %Y instead"
     )
 
 

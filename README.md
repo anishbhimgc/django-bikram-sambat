@@ -3,16 +3,16 @@
 [![CI](https://github.com/anishbhimgc/django-bikram/actions/workflows/ci.yml/badge.svg)](https://github.com/anishbhimgc/django-bikram/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/django-bikram)](https://pypi.org/project/django-bikram/)
 [![Python versions](https://img.shields.io/pypi/pyversions/django-bikram)](https://pypi.org/project/django-bikram/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/anishbhimgc/django-bikram/blob/main/LICENSE)
 [![Types: mypy strict](https://img.shields.io/badge/types-mypy%20strict-blue)](https://mypy-lang.org/)
 [![Lint: ruff](https://img.shields.io/badge/lint-ruff-261230)](https://github.com/astral-sh/ruff)
 
 Bikram Sambat (Nepali) dates for Python, with first-class Django and DRF
 integration.
 
-> **New here?** Start with the **[Quickstart](docs/quickstart.md)**.
+> **New here?** Start with the **[Quickstart](https://github.com/anishbhimgc/django-bikram/blob/main/docs/quickstart.md)**.
 >
-> 🇳🇵 नेपालीमा: [README.ne.md](README.ne.md) · [छिटो सुरु गर्ने मार्गदर्शन](docs/quickstart.ne.md)
+> 🇳🇵 नेपालीमा: [README.ne.md](https://github.com/anishbhimgc/django-bikram/blob/main/README.ne.md) · [छिटो सुरु गर्ने मार्गदर्शन](https://github.com/anishbhimgc/django-bikram/blob/main/docs/quickstart.ne.md)
 
 ```python
 from django_bikram import BSDate
@@ -55,8 +55,8 @@ The residual is the traditional day-boundary rule plus the committee's occasiona
 manual corrections — real, and not tunable away. So computed years are shipped as
 a clearly-marked **provisional** tier, never as fact.
 
-If 2027 is too close for you (it is, for anything long-lived), you have two
-honest options — see [Living past 2084](#living-past-2084).
+If April 2028 is too close for you (it is, for anything long-lived), you have
+two honest options — see [Living past 2084](#living-past-2084).
 
 ### 2. Distribution name vs. import name
 
@@ -488,4 +488,4 @@ mypy django_bikram/
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See [LICENSE](https://github.com/anishbhimgc/django-bikram/blob/main/LICENSE).

@@ -4,10 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "django-bikram"
-version = "0.1.0"
+version = "0.2.0"
 description = "Bikram Sambat (Nepali) dates for Python and Django, stored as native database dates."
 readme = "README.md"
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
 keywords = ["bikram sambat", "nepali", "nepal", "date", "calendar", "django", "bs", "ad"]
 authors = [{ name = "Anish Gharti", email = "anishbhimgc@gmail.com" }]
@@ -16,12 +17,9 @@ classifiers = [
     "Environment :: Web Environment",
     "Framework :: Django",
     "Framework :: Django :: 4.2",
-    "Framework :: Django :: 5.0",
-    "Framework :: Django :: 5.1",
     "Framework :: Django :: 5.2",
     "Framework :: Django :: 6.0",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Natural Language :: Nepali",
     "Natural Language :: English",
     "Operating System :: OS Independent",

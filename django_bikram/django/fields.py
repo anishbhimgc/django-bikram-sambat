@@ -40,6 +40,7 @@ from __future__ import annotations
 import datetime
 from typing import Any
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -188,8 +189,8 @@ class BSDateField(models.DateField):
         unvalidated**: it is already the Gregorian value the column wants, so
         round-tripping it through :class:`BSDate` would add nothing but a range
         check. That check would actively break correct queries -- the exclusive
-        upper bound of the last supported BS year is 2027-04-14, one day past
-        the table, so ``bs_year_q(field, 2083)`` legitimately needs to send a
+        upper bound of the last supported BS year is 2028-04-13, one day past
+        the table, so ``bs_year_q(field, 2084)`` legitimately needs to send a
         date that has no BS equivalent. Validation belongs in
         :meth:`to_python` (and therefore ``full_clean``), which is also where
         :class:`~django.db.models.DateField` puts it.
@@ -221,7 +222,7 @@ class BSDateField(models.DateField):
 
         :meth:`get_prep_value` deliberately lets a bare :class:`datetime.date`
         through unvalidated so that a bound one day past the table keeps working
-        -- ``bs_year_q(field, 2083)`` needs 2027-04-14, which has no BS
+        -- ``bs_year_q(field, 2084)`` needs 2028-04-13, which has no BS
         equivalent. That licence is correct for a **query** and wrong for a
         **write**: a stored date with no BS equivalent is readable by nothing.
         :meth:`from_db_value` raises on it, so the row poisons not just itself but
@@ -241,6 +242,12 @@ class BSDateField(models.DateField):
         Raises:
             ValidationError: If the value has no Bikram Sambat equivalent.
         """
+        # A resolved query expression -- the CASE that bulk_update() builds, a
+        # Col from update(field=F(...)) -- carries as_sql and must reach SQL
+        # untouched, exactly as django.db.models.Field.get_db_prep_save does.
+        # Without this it falls into get_prep_value/to_python and raises.
+        if hasattr(value, "as_sql"):
+            return value
         prepared = self.get_prep_value(value)
         if prepared is not None:
             try:
@@ -268,8 +275,12 @@ class BSDateField(models.DateField):
             # timezone.localdate(), not BSDate.today(): inside Django the stamp
             # must follow the project's TIME_ZONE, not the zone the container
             # happens to run in, and not this library's Nepal default either — a
-            # project that sets TIME_ZONE is stating which day it means.
-            value = BSDate.from_ad(timezone.localdate())
+            # project that sets TIME_ZONE is stating which day it means. But
+            # localdate() calls localtime(), which raises on the naive now()
+            # that USE_TZ=False produces, so fall back to the plain local date
+            # there -- exactly what stdlib DateField.pre_save does.
+            today = timezone.localdate() if settings.USE_TZ else datetime.date.today()
+            value = BSDate.from_ad(today)
             setattr(model_instance, self.attname, value)
             return value
         return super(models.DateField, self).pre_save(model_instance, add)

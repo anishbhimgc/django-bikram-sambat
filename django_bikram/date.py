@@ -9,6 +9,7 @@ already knows :mod:`datetime` should not have to learn much.
 from __future__ import annotations
 
 import datetime
+import warnings
 from typing import TYPE_CHECKING, Any, overload
 
 from .calendar_data import MAX_BS_YEAR, MIN_BS_YEAR, is_verified_year
@@ -113,14 +114,16 @@ class BSDate:
         """Support pickle and copy by rebuilding through the constructor.
 
         The default protocol for a ``__slots__`` class restores state with
-        ``setattr``, which :meth:`__setattr__` refuses. Reconstructing from the
-        constructor sidesteps that and re-validates on the way in, so an
-        unpickled date cannot smuggle in a value the constructor would reject.
+        ``setattr``, which :meth:`__setattr__` refuses. Reconstructing through
+        :func:`_reconstruct` sidesteps that and re-validates on the way in, so an
+        unpickled date cannot smuggle in a value the constructor would reject --
+        without re-emitting :class:`ProvisionalDateWarning` for a provisional
+        value that was already validated when it was first built.
 
         Returns:
             A ``(callable, args)`` pair as required by :mod:`pickle`.
         """
-        return (type(self), (self._year, self._month, self._day))
+        return (_reconstruct, (self._year, self._month, self._day))
 
     # -- components ------------------------------------------------------
 
@@ -543,8 +546,27 @@ class BSDate:
         return NotImplemented
 
 
-BSDate.min = BSDate(MIN_BS_YEAR, 1, 1)
-BSDate.max = BSDate(MAX_BS_YEAR, 12, days_in_month(MAX_BS_YEAR, 12))
+def _reconstruct(year: int, month: int, day: int) -> BSDate:
+    """Rebuild a :class:`BSDate` for pickle/copy, re-validating but not re-warning.
+
+    The value was already validated (and, if provisional, already warned about)
+    when it was first constructed, so round-tripping it through pickle or
+    ``copy`` must not emit a second :class:`ProvisionalDateWarning`.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        return BSDate(year, month, day)
+
+
+# MAX_BS_YEAR may already be a *provisional* year here: env-var activation runs
+# during calendar_data's import, before this module's. Building the sentinels
+# must not emit ProvisionalDateWarning at import time -- that would crash under
+# ``-W error`` / ``filterwarnings("error")`` (which this project's own pytest
+# config sets). Mirror the suppression in _reload_from_calendar_data below.
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    BSDate.min = BSDate(MIN_BS_YEAR, 1, 1)
+    BSDate.max = BSDate(MAX_BS_YEAR, 12, days_in_month(MAX_BS_YEAR, 12))
 
 
 def _reload_from_calendar_data() -> None:
@@ -555,8 +577,6 @@ def _reload_from_calendar_data() -> None:
     constructing it is suppressed here -- installing the table is not the same
     as a caller reaching into the provisional range.
     """
-    import warnings
-
     from . import calendar_data as cd
 
     global MAX_BS_YEAR

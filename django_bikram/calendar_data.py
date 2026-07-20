@@ -331,11 +331,14 @@ def install_provisional(table: dict[int, tuple[int, ...]]) -> None:
     refreshes the caches in :mod:`~django_bikram.convert` and the
     :attr:`~django_bikram.date.BSDate.max` bound.
 
-    **Run it once, at startup, before the first date operation.** The easiest way
-    is not to call it at all but to set the :data:`PROVISIONAL_ENV_VAR`
-    environment variable, which triggers exactly this at import -- the point at
-    which it is unambiguously safe. Installed years remain flagged: constructing
-    or converting one raises
+    **Run it once, at startup, before the first date operation, and not
+    concurrently with any conversion.** It mutates process-global tables in
+    place (validating fully first, so a bad table never half-applies), but a
+    thread converting a date during the mutation could momentarily see a partial
+    table. The easiest way is not to call it at all but to set the
+    :data:`PROVISIONAL_ENV_VAR` environment variable, which triggers exactly this
+    at import -- the point at which it is unambiguously safe. Installed years
+    remain flagged: constructing or converting one raises
     :class:`~django_bikram.exceptions.ProvisionalDateWarning`, and
     :func:`is_verified_year` reports ``False`` for it.
 
@@ -391,7 +394,7 @@ def install_provisional(table: dict[int, tuple[int, ...]]) -> None:
     # first), so these are no-ops; at a startup call they keep everything in sync.
     import sys
 
-    for name in ("convert", "date", "formatting"):
+    for name in ("convert", "date"):
         module = sys.modules.get(f"{__package__}.{name}")
         if module is not None:
             module._reload_from_calendar_data()
@@ -410,7 +413,9 @@ def _activate_provisional_from_env() -> None:
     than silently disabling the feature the operator asked for.
 
     Raises:
-        ValueError: If the variable is set but not an integer BS year.
+        ValueError: If the variable is set but not an integer BS year, or names
+            an implausibly distant year (a likely typo -- prediction is
+            ``O(year - 1975)``, so a stray digit would hang import).
     """
     raw = os.environ.get(PROVISIONAL_ENV_VAR, "").strip()
     if not raw:
@@ -421,6 +426,14 @@ def _activate_provisional_from_env() -> None:
         raise ValueError(
             f"{PROVISIONAL_ENV_VAR} must be an integer BS year, got {raw!r}"
         ) from None
+    # A stray digit (e.g. 21840) would make build_provisional_table walk tens of
+    # thousands of years at import. Cap it well past any real need and fail loud.
+    sane_ceiling = VERIFIED_MAX_BS_YEAR + 500
+    if through_year > sane_ceiling:
+        raise ValueError(
+            f"{PROVISIONAL_ENV_VAR}={through_year} is implausibly far in the "
+            f"future (ceiling {sane_ceiling}); check for a typo"
+        )
     from .predict import build_provisional_table
 
     install_provisional(build_provisional_table(through_year))

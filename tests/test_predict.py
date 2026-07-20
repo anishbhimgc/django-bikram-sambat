@@ -212,3 +212,74 @@ def test_default_import_has_no_provisional_years() -> None:
         """,
     )
     assert out.strip() == "ok"
+
+
+def test_import_is_warning_clean_under_env_activation_and_w_error() -> None:
+    """With the env var set AND -W error, import must not emit/raise a warning.
+
+    The BSDate.max sentinel is itself a provisional date; building it must be
+    suppressed, or `import django_bikram` crashes under warnings-as-error
+    (which this project's own pytest config sets).
+    """
+    import os
+
+    result = subprocess.run(
+        [sys.executable, "-W", "error", "-c",
+         "import django_bikram; print(django_bikram.MAX_BS_YEAR)"],
+        capture_output=True, text=True, check=False,
+        env={**os.environ, "DJANGO_BIKRAM_PROVISIONAL_THROUGH_YEAR": "2150"},
+    )
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == "2150"
+
+
+def test_env_var_typo_is_rejected_not_hung() -> None:
+    """An implausibly large env year fails loudly instead of walking millennia."""
+    import os
+
+    result = subprocess.run(
+        [sys.executable, "-c", "import django_bikram"],
+        capture_output=True, text=True, check=False, timeout=30,
+        env={**os.environ, "DJANGO_BIKRAM_PROVISIONAL_THROUGH_YEAR": "21840"},
+    )
+    assert result.returncode != 0
+    assert "implausibly far" in result.stderr
+
+
+def test_copy_and_pickle_of_provisional_do_not_rewarn() -> None:
+    """Round-tripping an already-held provisional date must not re-warn."""
+    out = _run(
+        """
+        import warnings, copy, pickle
+        from django_bikram import BSDate
+        from django_bikram.calendar_data import install_provisional
+        from django_bikram.predict import build_provisional_table
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            install_provisional(build_provisional_table(2120))
+            d = BSDate(2100, 1, 1)
+        warnings.simplefilter("error")   # any ProvisionalDateWarning now fails
+        assert copy.copy(d) == d
+        assert copy.deepcopy(d) == d
+        assert pickle.loads(pickle.dumps(d)) == d
+        print("ok")
+        """,
+    )
+    assert out.strip() == "ok"
+
+
+def test_two_digit_year_is_stable_across_provisional_install() -> None:
+    """%y is pinned to the verified range, so install doesn't shift it."""
+    out = _run(
+        """
+        from django_bikram import parse_bs
+        from django_bikram.calendar_data import install_provisional
+        from django_bikram.predict import build_provisional_table
+        before = parse_bs("85-01-01", "%y-%m-%d")[0]
+        install_provisional(build_provisional_table(2100))
+        after = parse_bs("85-01-01", "%y-%m-%d")[0]
+        assert before == after == 1985, (before, after)
+        print("ok")
+        """,
+    )
+    assert out.strip() == "ok"

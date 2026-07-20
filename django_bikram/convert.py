@@ -153,6 +153,8 @@ def days_in_year(year: int) -> int:
         >>> days_in_year(2081)
         366
     """
+    if not isinstance(year, int) or isinstance(year, bool):
+        raise InvalidBSDate(f"year must be an int, got {type(year).__name__!r}")
     if year not in BS_MONTH_DAYS:
         raise DateOutOfRange(
             f"BS year {year} is outside the verified range "

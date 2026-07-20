@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-19
+
 ### Added
 
 - **Verified 2084 BS.** The verified range now runs 1975–2084 BS
@@ -23,9 +25,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`BSDateField.bulk_update()` and `update(field=F(...))`** no longer crash:
+  `get_db_prep_save` now passes resolved query expressions through instead of
+  routing them into `to_python`.
+- **`auto_now` / `auto_now_add` under `USE_TZ=False`** no longer crash;
+  `pre_save` falls back to the plain local date where `localdate()` would raise.
+- **`import django_bikram` under `-W error`** with the provisional env var set no
+  longer crashes (the `BSDate.max` sentinel no longer emits a warning at import),
+  and copying/pickling a provisional `BSDate` no longer re-emits it.
+- `%y` two-digit-year parsing is pinned to the *verified* range, so installing
+  provisional years never silently changes what it resolves to.
+- `days_in_year()` rejects non-`int` years like `days_in_month()` does; the
+  provisional env var rejects an implausibly large (typo'd) year instead of
+  hanging import.
 - `mypy` now passes on the whole package under Django 6.0 without stubs (typed
   the form widget's context; marked the DRF field's always-raising paths
   terminal). Added an English `docs/quickstart.md` alongside the Nepali one.
+
+### Packaging
+
+- Modernized metadata: `License-Expression: MIT` (PEP 639), dropped the untested
+  Django 5.0/5.1 classifiers, absolute README links (render on PyPI), SHA-pinned
+  GitHub Actions with Dependabot, and a concurrency guard on the publish job.
 
 ## [0.1.0] - 2026-07-18
 

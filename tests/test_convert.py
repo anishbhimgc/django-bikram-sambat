@@ -148,6 +148,14 @@ def test_days_in_year_matches_the_table() -> None:
         assert days_in_year(year) == sum(BS_MONTH_DAYS[year])
 
 
+def test_days_in_year_rejects_non_ints_like_days_in_month() -> None:
+    """A float or bool year raises InvalidBSDate, like days_in_month does."""
+    with pytest.raises(InvalidBSDate):
+        days_in_year(2081.0)  # type: ignore[arg-type]
+    with pytest.raises(InvalidBSDate):
+        days_in_year(True)  # type: ignore[arg-type]
+
+
 def test_booleans_are_not_accepted_as_components() -> None:
     """``True`` is an int in Python, but it is not a month."""
     with pytest.raises(InvalidBSDate):

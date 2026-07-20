@@ -10,6 +10,7 @@ from django.core.serializers import deserialize, serialize
 from django.db import connection, models, transaction
 from django.db.models import Max, Min
 from django.db.models.functions import ExtractYear
+from django.test import override_settings
 from django.utils import timezone
 
 from django_bikram import BSDate
@@ -151,14 +152,43 @@ def test_query_bound_one_day_past_the_table_is_allowed() -> None:
     """A Gregorian query bound with no BS equivalent must still work.
 
     Regression test. The exclusive upper bound of the last supported BS year
-    (2083) is 2027-04-14, which is one day past the table and therefore has no
-    BSDate. get_prep_value must pass a datetime.date straight through rather
-    than round-trip it through BSDate, or every range query touching the end of
-    the calendar raises.
+    (2084) is 2028-04-13, one day past the table and therefore with no BSDate.
+    get_prep_value must pass a datetime.date straight through rather than
+    round-trip it through BSDate, or every range query touching the end of the
+    calendar raises.
     """
-    Invoice.objects.create(issued_on=BSDate(2083, 12, 30))
-    edge = datetime.date(2027, 4, 14)
+    Invoice.objects.create(issued_on=BSDate(2084, 12, 30))
+    edge = datetime.date(2028, 4, 13)  # bs_year_bounds(2084)[1]; not representable
+    with pytest.raises(Exception):  # noqa: B017,PT011 - genuinely has no BSDate
+        BSDate.from_ad(edge)
     assert Invoice.objects.filter(issued_on__lt=edge).count() == 1
+
+
+def test_bulk_update_survives_the_case_expression() -> None:
+    """bulk_update's CASE expression must pass through get_db_prep_save."""
+    a = Invoice.objects.create(issued_on=BSDate(2081, 1, 1))
+    b = Invoice.objects.create(issued_on=BSDate(2081, 1, 5))
+    a.issued_on, b.issued_on = BSDate(2081, 2, 1), BSDate(2081, 2, 2)
+    Invoice.objects.bulk_update([a, b], ["issued_on"])
+    assert Invoice.objects.get(pk=a.pk).issued_on == BSDate(2081, 2, 1)
+    assert Invoice.objects.get(pk=b.pk).issued_on == BSDate(2081, 2, 2)
+
+
+def test_update_with_an_f_expression() -> None:
+    """`update(field=F(other))` resolves to a Col and must reach SQL untouched."""
+    inv = Invoice.objects.create(
+        issued_on=BSDate(2081, 1, 1), due_on=BSDate(2082, 1, 1)
+    )
+    Invoice.objects.update(due_on=models.F("issued_on"))
+    assert Invoice.objects.get(pk=inv.pk).due_on == BSDate(2081, 1, 1)
+
+
+@override_settings(USE_TZ=False)
+def test_auto_fields_work_under_use_tz_false() -> None:
+    """auto fields must not call localdate() (raises) under USE_TZ=False."""
+    inv = Invoice.objects.create(issued_on=BSDate(2081, 1, 1))
+    assert isinstance(inv.created_on, BSDate)  # auto_now_add populated, no crash
+    assert isinstance(inv.updated_on, BSDate)  # auto_now populated, no crash
 
 
 def test_gregorian_and_bs_filters_agree() -> None:
