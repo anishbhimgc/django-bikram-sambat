@@ -1,0 +1,5 @@
+# Every change requests a review from the maintainer by default.
+# The calendar data is the correctness core -- called out so it always gets
+# extra scrutiny even if that ever changes.
+*                                   @anishbhimgc
+/django_bikram/calendar_data.py     @anishbhimgc
