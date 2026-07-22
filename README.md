@@ -111,7 +111,7 @@ integer columns. Both throw away everything the database is for:
 | `__gte` / `__lt` / `__range` | ✅ plain comparison | ❌ wrong across month lengths | ⚠️ OR-of-ANDs |
 | `ORDER BY` | ✅ | ❌ | ⚠️ 3-column sort |
 | `Min` / `Max` / aggregates | ✅ | ❌ | ❌ |
-| `TruncMonth`, `ExtractYear`, date_trunc | ✅ | ❌ | ❌ |
+| `TruncMonth`, `ExtractYear`, date_trunc | ✅ *(on the AD value — see below)* | ❌ | ❌ |
 | readable from psql / BI tools | ✅ | ⚠️ | ❌ |
 
 A BS string does not sort chronologically in a way the database understands,
@@ -121,15 +121,37 @@ nothing to reimplement.
 
 ### The one consequence to know
 
-`__year`, `__month` and `__day` are **inherited from `DateField` and operate on
-the stored Gregorian value**, because that is genuinely what the column holds:
+Every database-side date operation is **inherited from `DateField` and works on
+the stored Gregorian value**, because that is genuinely what the column holds.
 
 ```python
 Invoice.objects.filter(issued_on__year=2024)   # AD year — 1 Baishakh 2081 matches
 Invoice.objects.filter(issued_on__year=2081)   # matches nothing
 ```
 
-This is documented, tested, and intentional. For BS years, read on.
+`ExtractYear` is the same story and says so out loud — it returns `2024`, a
+plain integer nobody will mistake for a BS year.
+
+**`TruncMonth` and `TruncYear` are the one case that does not announce itself,
+so it is worth stating plainly.** They truncate to the start of the *AD* month
+or year, which falls in the middle of a BS one; the result then converts back
+through this field and arrives as a `BSDate` that is not a BS period start:
+
+```python
+Invoice.objects.annotate(m=TruncMonth("issued_on"))   # 1 Baishakh 2081 →
+                                                      # BSDate(2080, 12, 19)
+Invoice.objects.annotate(y=TruncYear("issued_on"))    # → BSDate(2080, 9, 16)
+```
+
+That is a correct AD truncation and a meaningless BS bucket. To group by Bikram
+Sambat periods, aggregate per range with the helpers below, or bucket in Python:
+
+```python
+start, end = bs_month_bounds(2081, 1)
+Invoice.objects.filter(issued_on__gte=start, issued_on__lt=end).aggregate(Sum("total"))
+```
+
+All of this is documented, tested, and intentional. For BS years, read on.
 
 ---
 

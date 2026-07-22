@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.core.serializers import deserialize, serialize
 from django.db import connection, models, transaction
 from django.db.models import Max, Min
-from django.db.models.functions import ExtractYear
+from django.db.models.functions import ExtractYear, TruncMonth, TruncYear
 from django.test import override_settings
 from django.utils import timezone
 
@@ -241,6 +241,23 @@ def test_db_side_date_function_sees_gregorian() -> None:
     assert row.ad_year == 2024
 
 
+def test_trunc_buckets_by_the_gregorian_period() -> None:
+    """Trunc* truncates the AD value, so the BSDate it returns is mid-period.
+
+    The one DB-side date function whose result does not announce which calendar
+    it came from: ExtractYear returns a bare 2024, but Trunc* returns a BSDate
+    that looks like a BS period start and is not one. Pinned here because the
+    README documents these exact values -- group by BS periods with the range
+    helpers in django_bikram.django.lookups instead.
+    """
+    Invoice.objects.create(issued_on=BSDate(2081, 1, 1))  # 2024-04-13
+    row = Invoice.objects.annotate(
+        m=TruncMonth("issued_on"), y=TruncYear("issued_on")
+    ).get()
+    assert row.m == BSDate(2080, 12, 19)  # AD 2024-04-01, not 1 Baishakh
+    assert row.y == BSDate(2080, 9, 16)  # AD 2024-01-01, not 1 Baishakh
+
+
 def test_builtin_year_lookup_is_gregorian() -> None:
     """The inherited __year lookup filters on the AD year, by construction."""
     Invoice.objects.create(issued_on=BSDate(2081, 1, 1))  # 2024-04-13
@@ -303,6 +320,43 @@ def test_dumpdata_emits_bs_and_loaddata_reads_it_back() -> None:
     for obj in deserialize("json", payload):
         obj.save()
     assert Invoice.objects.get().issued_on == BSDate(2081, 1, 1)
+
+
+def test_json_serializer_emits_bs_for_an_assigned_gregorian_date() -> None:
+    """A raw date assigned in memory still serialises as Bikram Sambat.
+
+    The JSON and Python serializers pass a value straight through when Django's
+    is_protected_type() is true, which it is for datetime.date -- so
+    value_to_string never runs and the *Gregorian* digits would reach the
+    fixture, where loaddata reads them back as BS. A silent 57-year error.
+    value_from_object normalises the date first, which both fixes the value and
+    makes it a non-protected type so value_to_string is consulted after all.
+    """
+    unsaved = Invoice(issued_on=datetime.date(2024, 4, 13))
+    assert '"issued_on": "2081-01-01"' in serialize("json", [unsaved])
+    assert serialize("python", [unsaved])[0]["fields"]["issued_on"] == "2081-01-01"
+    # The XML serializer always calls value_to_string, so it was never affected.
+    assert ">2081-01-01<" in serialize("xml", [unsaved])
+
+
+def test_model_to_dict_normalises_an_assigned_gregorian_date() -> None:
+    """ModelForm initial data shows the BS value, not the Gregorian one.
+
+    model_to_dict() reads through value_from_object, so without the conversion a
+    raw date would render via str() as Gregorian digits inside a BS field.
+    """
+    from django.forms.models import model_to_dict
+
+    unsaved = Invoice(issued_on=datetime.date(2024, 4, 13))
+    assert model_to_dict(unsaved)["issued_on"] == BSDate(2081, 1, 1)
+
+
+def test_value_from_object_leaves_strings_alone() -> None:
+    """A string passes through, so a failed form redisplays what was typed."""
+    unsaved = Invoice(issued_on="not a date")
+    assert Invoice._meta.get_field("issued_on").value_from_object(unsaved) == (
+        "not a date"
+    )
 
 
 def test_field_deconstructs_for_migrations() -> None:

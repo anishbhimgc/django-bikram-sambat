@@ -7,12 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-07-22
+
 ### Fixed
 
+- **`serializers.serialize("json"|"python", ...)` no longer emits Gregorian
+  digits** for an in-memory instance that was assigned a raw `datetime.date`.
+  Those serializers pass a value through untouched when Django's
+  `is_protected_type()` is true — which it is for `datetime.date` — so
+  `value_to_string()` was never consulted and the AD digits reached the fixture,
+  where `loaddata` read them back as Bikram Sambat: a silent 57-year error.
+  `BSDateField.value_from_object()` now normalises the date first. `dumpdata` was
+  never affected (it loads from the database, so the value is already a
+  `BSDate`), nor was the XML serializer.
+- `model_to_dict()` — and therefore `ModelForm` initial data — normalises an
+  assigned `datetime.date` the same way, instead of rendering the Gregorian
+  digits into a Bikram Sambat field.
 - `BSDate.fromisoformat()` now accepts only ASCII and Devanagari digits, matching
   `strptime()`/`parse_bs()`. Previously fullwidth digits (`"２０８１-01-01"`) parsed
   through `fromisoformat` but were rejected by the other parse paths — the two
   entry points now agree on the numeral systems this package speaks.
+
+### Documentation
+
+- **`TruncMonth` / `TruncYear`** are now documented as the one database-side date
+  function whose result does not announce its calendar. They truncate the stored
+  *Gregorian* value and the result converts back to a `BSDate` that is not a BS
+  period start — `TruncMonth` over 1 Baishakh 2081 yields `BSDate(2080, 12, 19)`.
+  A correct AD truncation and a meaningless BS bucket. Both READMEs now say so,
+  the values are pinned by a test, and the range helpers are named as the way to
+  group by Bikram Sambat periods. No behaviour changed.
 
 ### Security
 

@@ -29,10 +29,20 @@ Because :class:`BSDateField` subclasses :class:`~django.db.models.DateField`,
 every lookup Django already implements for dates keeps working, and values are
 converted through :meth:`BSDateField.get_prep_value` on the way down.
 
-The one thing to know is that the built-in ``__year`` / ``__month`` / ``__day``
-lookups operate on the **stored Gregorian** value, because that is genuinely
-what the column contains. See :mod:`django_bikram.django.lookups` for the BS-year
-equivalent and why it is a helper rather than a lookup.
+The one thing to know is that every database-side date operation works on the
+**stored Gregorian** value, because that is genuinely what the column contains:
+
+* ``__year`` / ``__month`` / ``__day`` filter on the AD components. See
+  :mod:`django_bikram.django.lookups` for the BS-year equivalent and why it is a
+  helper rather than a lookup.
+* ``ExtractYear`` and friends return the AD number -- ``2024``, not ``2081``.
+* ``TruncMonth`` / ``TruncYear`` truncate to the start of the **AD** month or
+  year, which is a day in the middle of a BS one. Because their ``output_field``
+  is this field, the result is then converted back and arrives as a
+  :class:`BSDate` that is *not* a BS month or year start:
+  ``TruncMonth`` over 1 Baishakh 2081 yields ``BSDate(2080, 12, 19)``. Group by
+  Bikram Sambat periods with the range helpers in
+  :mod:`django_bikram.django.lookups` instead, or bucket in Python.
 """
 
 from __future__ import annotations
@@ -285,6 +295,51 @@ class BSDateField(models.DateField):
             return value
         return super(models.DateField, self).pre_save(model_instance, add)
 
+    def value_from_object(self, obj: models.Model) -> Any:
+        """Read the attribute, normalising a raw Gregorian date to a BS date.
+
+        :meth:`~django.db.models.Field.value_from_object` is a bare ``getattr``,
+        so on an instance that was assigned a :class:`datetime.date` and not yet
+        reloaded it hands back the **Gregorian** value. Two callers act on that
+        directly, and both would then publish the wrong calendar:
+
+        * The JSON and Python serializers pass a value straight through when
+          Django's ``is_protected_type()`` is true -- which it is for
+          ``datetime.date`` -- so :meth:`value_to_string` is never consulted and
+          the Gregorian digits land in the fixture, where ``loaddata`` reads them
+          back as Bikram Sambat. A silent 57-year error. (``dumpdata`` itself was
+          always safe: it loads from the database, so the attribute is already a
+          :class:`BSDate`. So is the XML serializer, which always calls
+          :meth:`value_to_string`.)
+        * ``model_to_dict()`` builds ``ModelForm`` initial data, where a raw date
+          renders through ``str()`` as Gregorian digits in a Bikram Sambat field.
+
+        Converting here fixes both at the one point they share, and -- because a
+        :class:`BSDate` is *not* a protected type -- routes the serializers back
+        into :meth:`value_to_string` as intended.
+
+        Only ``date``/``datetime`` are coerced. A string passes through untouched
+        so that redisplaying a form the user failed to submit still shows what
+        they typed.
+
+        Args:
+            obj: The model instance.
+
+        Returns:
+            A :class:`BSDate` when the attribute holds a Gregorian date,
+            otherwise the attribute unchanged.
+
+        Raises:
+            ValidationError: If the assigned date has no Bikram Sambat
+                equivalent.
+        """
+        value = super().value_from_object(obj)
+        # datetime.datetime is a datetime.date subclass, so this covers both;
+        # BSDate deliberately is not, so it falls through untouched.
+        if isinstance(value, datetime.date):
+            return self.to_python(value)
+        return value
+
     def value_to_string(self, obj: models.Model) -> str:
         """Serialise the field for ``dumpdata``.
 
@@ -296,12 +351,9 @@ class BSDateField(models.DateField):
             Emitting BS (not AD) keeps fixtures human-meaningful and makes
             ``loaddata`` symmetric with :meth:`to_python`.
         """
-        # Coerced through to_python, not serialised straight off the attribute.
-        # value_from_object is a bare getattr, so on an instance that was assigned
-        # a raw datetime.date and not yet reloaded, .isoformat() emits the
-        # **Gregorian** digits — which to_python then reads back as Bikram Sambat.
-        # A silent 57-year error, and an asymmetric round-trip in the one method
-        # whose whole job is the round-trip.
+        # to_python is still applied on top of value_from_object: that method
+        # normalises a Gregorian date but deliberately lets a string through, and
+        # an assigned BS string has to be parsed before it can be re-emitted.
         value = self.to_python(self.value_from_object(obj))
         return "" if value is None else value.isoformat()
 
