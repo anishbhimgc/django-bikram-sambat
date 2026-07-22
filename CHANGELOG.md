@@ -9,6 +9,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0] - 2026-07-22
 
+### Read this first if you are upgrading
+
+This release fixes three bugs that produced **plausible-looking wrong answers
+instead of errors**. Nothing raised, so nothing in your logs would have flagged
+them. Two are read-only; one could have written wrong dates.
+
+**1. The Django admin wrote Gregorian dates into `BSDateField` — this one can
+have corrupted data.** `django.contrib.admin` maps `models.DateField` to
+`AdminDateWidget` by walking the field's MRO, so `BSDateField` inherited
+Django's *Gregorian* calendar popup and its "Today" button. Anything entered
+through them was stored as Bikram Sambat: clicking "Today" on 2026-07-22 saved
+`2026-07-22` **BS**, which is 1969-11-07 AD. It is a real BS date, so it passed
+validation silently.
+
+If any data was entered through the admin before this release, audit for it.
+A Gregorian date from 2024–2028 typed into this field lands between
+**1967-04-14 and 1972-04-12** AD — a window no genuine record is likely to
+occupy:
+
+```python
+import datetime
+Invoice.objects.filter(
+    issued_on__gte=datetime.date(1967, 4, 14),
+    issued_on__lte=datetime.date(1972, 4, 12),
+).count()
+```
+
+To recover one: take the row's stored value as a `BSDate` and read its digits as
+a Gregorian date — that is what the user meant. Stored 1969-11-07 is
+`BSDate(2026, 7, 22)`, so they meant 22 July 2026:
+
+```python
+bs = invoice.issued_on                                   # BSDate(2026, 7, 22)
+meant = datetime.date(bs.year, bs.month, bs.day)         # date(2026, 7, 22)
+invoice.issued_on = BSDate.from_ad(meant)                # the real BS date
+```
+
+**2. Admin `list_filter` on a `BSDateField` matched zero rows.** Read-only, no
+data affected. A list filter round-trips its bounds through the query string as
+ISO strings, and a string in this field's context is a Bikram Sambat value — so
+the Gregorian bound `2026-07-17` was re-read as 2026-07-17 BS (1969 AD). Every
+bucket, including "Today" on a row saved today, returned nothing. Use the new
+`BSDateFieldListFilter`; Django's built-in one cannot work on this field.
+
+**3. `serializers.serialize("json"|"python", …)` could emit Gregorian digits.**
+Narrow: only for an in-memory instance holding a raw `datetime.date` that had
+not been reloaded. `dumpdata` was never affected, because it loads from the
+database. If you generated fixtures from unsaved instances, re-generate them.
+
+Also fixed, but these raised errors rather than lying, so you would have noticed:
+the DRF field could not parse its own output for some `format` values, and a form
+field overwrote a language set on its widget.
+
 ### Added
 
 - **`django_bikram.fiscal`** — Nepali fiscal year (1 Shrawan to the last of
