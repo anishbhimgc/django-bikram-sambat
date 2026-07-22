@@ -363,17 +363,20 @@ are left alone.
 
 ### Admin list filters
 
-The same MRO lookup gives `BSDateField` Django's Gregorian `DateFieldListFilter`,
-whose buckets are labelled with no calendar at all. "This month" selects the
-*Gregorian* month — which spans two BS months and, in mid-July, two fiscal years:
+The same MRO lookup gives `BSDateField` Django's Gregorian `DateFieldListFilter`.
+**Do not use it on this field — every bucket returns zero rows.**
 
-```
-"This month"  →  AD 2026-07-01 .. 2026-08-01  =  BS 2083-03-17 .. 2083-04-16
-the BS month  →  AD 2026-07-17 .. 2026-08-17
-```
+A list filter round-trips its bounds through the query string, so they come back
+as ISO strings, and a string in this field's context is a *Bikram Sambat* value
+(that is the documented contract). The Gregorian bound `2026-07-17` is therefore
+re-read as 2026-07-17 **BS** — 1969 AD — and matches nothing. "Today" on a row
+saved today returns nothing, on every supported Django version. The labels are
+wrong too: "This month" means the *Gregorian* month, which spans two BS months
+and, in mid-July, two fiscal years.
 
 Use the BS-aware filter instead. It offers *Today*, *Past 7 days*, *This month*,
-*This year* and *This fiscal year*, each a half-open range on the indexed column:
+*This year* and *This fiscal year*, each a half-open range on the indexed column,
+and it parses its own bounds back as Gregorian so the buckets actually select:
 
 ```python
 from django_bikram.django.admin import BSDateFieldListFilter

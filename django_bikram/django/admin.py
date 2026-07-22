@@ -69,6 +69,8 @@ import datetime
 from typing import Any
 
 from django.contrib.admin.filters import DateFieldListFilter, FieldListFilter
+from django.contrib.admin.options import IncorrectLookupParameters
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -119,8 +121,12 @@ class BSDateFieldListFilter(DateFieldListFilter):
         # choices(), expected_parameters() and get_facet_counts() all read
         # self.links, so replacing that attribute is enough to reuse them.
         self.field_generic = f"{field_path}__"
+        # Django <5.0 hands `params` values as plain strings; 5.0+ as lists of
+        # them. Normalise, rather than copying either version's idiom.
         self.date_params = {
-            k: v[-1] for k, v in params.items() if k.startswith(self.field_generic)
+            k: (v[-1] if isinstance(v, (list, tuple)) else v)
+            for k, v in params.items()
+            if k.startswith(self.field_generic)
         }
         self.lookup_kwarg_since = f"{field_path}__gte"
         self.lookup_kwarg_until = f"{field_path}__lt"
@@ -139,6 +145,97 @@ class BSDateFieldListFilter(DateFieldListFilter):
         FieldListFilter.__init__(
             self, field, request, params, model, model_admin, field_path
         )
+
+    def queryset(self, request: Any, queryset: Any) -> Any:
+        """Apply the selected bucket, reading its bounds as **Gregorian**.
+
+        This is what makes the filter actually work, and it is not optional.
+
+        A list filter round-trips its bounds through the query string, so by the
+        time they come back they are ISO strings -- ``issued_on__gte=2026-07-17``.
+        :meth:`BSDateField.to_python` reads a string as *Bikram Sambat* (that is
+        the documented contract: a string in that field's context is the BS value
+        a user typed), so the bound is re-read as 2026-07-17 **BS** = 1969 AD and
+        the filter matches nothing at all.
+
+        That defeats Django's own ``DateFieldListFilter`` on this field too, on
+        every supported version: every bucket, including "Today" on a row saved
+        today, returns zero rows. The bounds this filter puts in the URL are
+        Gregorian, so they are parsed back as Gregorian here.
+
+        Args:
+            request: The current request.
+            queryset: The changelist queryset.
+
+        Returns:
+            The filtered queryset.
+
+        Raises:
+            IncorrectLookupParameters: If a bound in the URL is not a valid ISO
+                date -- a hand-edited or stale query string.
+        """
+        try:
+            lookups = {
+                key: self._as_gregorian(key, value)
+                for key, value in self.used_parameters.items()
+            }
+            return queryset.filter(**lookups)
+        except (ValueError, ValidationError) as exc:
+            raise IncorrectLookupParameters(exc) from exc
+
+    @staticmethod
+    def _as_gregorian(key: str, value: Any) -> Any:
+        """Coerce one URL parameter to the type the lookup needs.
+
+        Args:
+            key: The lookup key, e.g. ``"issued_on__gte"``.
+            value: The raw value from the query string.
+
+        Returns:
+            A :class:`datetime.date` for the range bounds, so they are never
+            re-read as Bikram Sambat; anything else (``__isnull``) untouched.
+
+        Raises:
+            ValueError: If a bound is not an ISO date.
+        """
+        if key.endswith("__isnull"):
+            return value
+        if isinstance(value, (list, tuple)):
+            value = value[-1]
+        if isinstance(value, str):
+            return datetime.date.fromisoformat(value)
+        return value
+
+    def choices(self, changelist: Any) -> Any:
+        """Yield the filter's choices, with a version-independent selected state.
+
+        Django <5.0 compares ``self.date_params`` (strings, from the query
+        string) against the raw ``links`` params; 5.0+ stringifies both first.
+        This filter's links hold :class:`datetime.date` objects -- they have to,
+        so :meth:`queryset` never sees an ambiguous string -- which means the
+        older comparison never matches and no bucket ever highlights. Comparing
+        stringified values works on every version.
+
+        Args:
+            changelist: The admin changelist.
+
+        Yields:
+            One choice dict per bucket.
+        """
+        # add_facets and get_facet_queryset are Django 5.0+; degrade quietly.
+        add_facets = getattr(changelist, "add_facets", False)
+        facet_counts = self.get_facet_queryset(changelist) if add_facets else None
+        for index, (title, param_dict) in enumerate(self.links):
+            param_dict_str = {key: str(value) for key, value in param_dict.items()}
+            if add_facets and facet_counts is not None:
+                title = f"{title} ({facet_counts[f'{index}__c']})"
+            yield {
+                "selected": self.date_params == param_dict_str,
+                "query_string": changelist.get_query_string(
+                    param_dict_str, [self.field_generic]
+                ),
+                "display": title,
+            }
 
     def _today(self) -> BSDate | None:
         """Return today as a :class:`BSDate`, or ``None`` if unrepresentable.

@@ -30,16 +30,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   both directions. Progressive enhancement — the field is still a text input,
   and every value is re-validated server-side.
 - **`BSDateFieldListFilter`** in `django_bikram.django.admin` — an admin
-  `list_filter` whose periods are Bikram Sambat. Django resolves `BSDateField`
-  through `isinstance(f, models.DateField)` to its own Gregorian filter, whose
-  buckets carry no calendar in their labels: "This month" selects the *Gregorian*
-  month, which spans two BS months and, in mid-July, two fiscal years. The
-  replacement offers Today, Past 7 days, This month, This year and This fiscal
-  year, each still a single index range scan, and omits any bucket that would
-  reach past the verified table rather than approximating it. Opt in per field,
-  or globally with `register_list_filter()`. `date_hierarchy` remains Gregorian
-  and is now documented as such — it is built by a template tag with no registry
-  to hook.
+  `list_filter` whose periods are Bikram Sambat, and which actually works.
+  Django resolves `BSDateField` through `isinstance(f, models.DateField)` to its
+  own Gregorian filter, which is broken on this field in two ways. Its labels
+  carry no calendar — "This month" selects the *Gregorian* month, spanning two BS
+  months and, in mid-July, two fiscal years. Worse, **every one of its buckets
+  matches zero rows**: a list filter round-trips its bounds through the query
+  string as ISO strings, and a string in this field's context is a Bikram Sambat
+  value, so the Gregorian bound `2026-07-17` is re-read as 2026-07-17 BS
+  (1969 AD). "Today" on a row saved today returns nothing, on every supported
+  Django version. The replacement offers Today, Past 7 days, This month, This
+  year and This fiscal year, parses its own bounds back as Gregorian, keeps each
+  a single index range scan, and omits any bucket reaching past the verified
+  table rather than approximating it. Opt in per field, or globally with
+  `register_list_filter()`. `date_hierarchy` remains Gregorian and is now
+  documented as such — it is built by a template tag with no registry to hook.
 - `django_bikram.apps.DjangoBikramConfig` — add `"django_bikram"` to
   `INSTALLED_APPS` to make the picker's static assets discoverable by
   `collectstatic`. Needed for the picker only; nothing else in the package

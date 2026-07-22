@@ -42,6 +42,15 @@ def _changelist(list_filter: list) -> tuple:
     return changelist.get_filters(request)[0][0], changelist
 
 
+def _as_date(value) -> datetime.date:
+    """Normalise a bucket bound to a date.
+
+    Django <5.0 builds its links with ``str(today)``; 5.0+ keeps the date
+    object. Tests compare bounds, not Django's internal representation.
+    """
+    return datetime.date.fromisoformat(value) if isinstance(value, str) else value
+
+
 def _buckets(list_filter: list) -> dict[str, tuple]:
     """Return ``{label: (since, until)}`` for a filter's date buckets."""
     flt, _ = _changelist(list_filter)
@@ -49,8 +58,40 @@ def _buckets(list_filter: list) -> dict[str, tuple]:
     for title, params in flt.links:
         if not params or "isnull" in next(iter(params), ""):
             continue
-        out[str(title)] = tuple(params.values())
+        out[str(title)] = tuple(_as_date(v) for v in params.values())
     return out
+
+
+def _click(list_filter: list, label: str) -> tuple[int, bool]:
+    """Follow a bucket's own query string and report (row count, highlighted).
+
+    Going through the URL is the whole point: a filter's bounds round-trip as
+    strings, and this field reads a string as Bikram Sambat.
+    """
+    from urllib.parse import parse_qsl, urlparse
+
+    class InvoiceAdmin(admin.ModelAdmin):
+        pass
+
+    InvoiceAdmin.list_filter = list_filter
+    model_admin = InvoiceAdmin(Invoice, AdminSite())
+    factory = RequestFactory()
+
+    request = factory.get("/")
+    request.user = User(is_superuser=True)
+    changelist = model_admin.get_changelist_instance(request)
+    flt = changelist.get_filters(request)[0][0]
+    query = next(
+        c["query_string"] for c in flt.choices(changelist) if str(c["display"]) == label
+    )
+
+    followed = factory.get("/", dict(parse_qsl(urlparse(query).query)))
+    followed.user = User(is_superuser=True)
+    changelist = model_admin.get_changelist_instance(followed)
+    highlighted = any(
+        c["selected"] for c in changelist.get_filters(followed)[0][0].choices(changelist)
+    )
+    return changelist.get_queryset(followed).count(), highlighted
 
 
 def test_django_default_is_gregorian_for_this_field() -> None:
@@ -109,6 +150,36 @@ def test_bs_filter_actually_filters() -> None:
     matched = set(Invoice.objects.filter(**params).values_list("pk", flat=True))
     assert inside.pk in matched
     assert outside.pk not in matched
+
+
+@pytest.mark.parametrize(
+    "label", ["Today", "Past 7 days", "This month", "This year", "This fiscal year"]
+)
+def test_clicking_a_bucket_returns_the_rows_it_promises(label: str) -> None:
+    """The regression that matters: follow the link, not just read the bounds.
+
+    A list filter round-trips its bounds through the query string, so they come
+    back as ISO strings -- and BSDateField reads a string as Bikram Sambat. The
+    AD bound 2026-07-17 was re-read as 2026-07-17 BS (1969 AD), so every bucket
+    matched zero rows while its label and range looked perfectly correct. Only
+    following the URL exposes it; inspecting flt.links does not.
+    """
+    Invoice.objects.create(issued_on=BSDate.today())
+    count, highlighted = _click([("issued_on", BSDateFieldListFilter)], label)
+    assert count == 1, f"{label!r} returned {count} rows for a row inside it"
+    assert highlighted, f"{label!r} did not highlight as selected"
+
+
+def test_django_default_filter_is_broken_when_clicked() -> None:
+    """Django's own date filter matches nothing on this field, on any version.
+
+    Same root cause as the test above, and the reason BSDateFieldListFilter is
+    not merely a relabelling. Pinned so that if Django ever stops sending its
+    bounds through the URL as bare strings, we find out.
+    """
+    Invoice.objects.create(issued_on=BSDate.today())
+    count, _ = _click(["issued_on"], "Today")
+    assert count == 0
 
 
 def test_bs_filter_offers_any_date_and_is_selectable() -> None:
