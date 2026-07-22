@@ -23,8 +23,8 @@ through them was stored as Bikram Sambat: clicking "Today" on 2026-07-22 saved
 `2026-07-22` **BS**, which is 1969-11-07 AD. It is a real BS date, so it passed
 validation silently.
 
-If any data was entered through the admin before this release, audit for it.
-A Gregorian date from 2024–2028 typed into this field lands between
+If any data was entered through the Django admin before this release, audit for
+it. A Gregorian date from 2024–2028 typed into this field lands between
 **1967-04-14 and 1972-04-12** AD — a window no genuine record is likely to
 occupy:
 
@@ -36,15 +36,10 @@ Invoice.objects.filter(
 ).count()
 ```
 
-To recover one: take the row's stored value as a `BSDate` and read its digits as
-a Gregorian date — that is what the user meant. Stored 1969-11-07 is
-`BSDate(2026, 7, 22)`, so they meant 22 July 2026:
-
-```python
-bs = invoice.issued_on                                   # BSDate(2026, 7, 22)
-meant = datetime.date(bs.year, bs.month, bs.day)         # date(2026, 7, 22)
-invoice.issued_on = BSDate.from_ad(meant)                # the real BS date
-```
+That covers a date typed near today. **[docs/auditing.md](docs/auditing.md)** has
+the general check for any entry year, how to tell a real hit from a coincidence
+(genuine dates before ~April 1993 are the only ambiguous ones), and a verified
+recovery recipe.
 
 **2. Admin `list_filter` on a `BSDateField` matched zero rows.** Read-only, no
 data affected. A list filter round-trips its bounds through the query string as
