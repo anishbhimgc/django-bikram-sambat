@@ -8,7 +8,7 @@ MRO::
     FieldListFilter.register(lambda f: isinstance(f, models.DateField),
                              DateFieldListFilter)
 
-:class:`~django_bikram.django.fields.BSDateField` subclasses
+:class:`~django_bikram_sambat.django.fields.BSDateField` subclasses
 :class:`~django.db.models.DateField` to inherit every date lookup, so it matches
 that test and gets Django's **Gregorian** date filter. The buckets it produces
 are correct ranges over the stored AD value and are labelled with no calendar at
@@ -37,7 +37,7 @@ Using it
 --------
 Per field, which is the recommended form::
 
-    from django_bikram.django.admin import BSDateFieldListFilter
+    from django_bikram_sambat.django.admin import BSDateFieldListFilter
 
     class InvoiceAdmin(admin.ModelAdmin):
         list_filter = [("issued_on", BSDateFieldListFilter)]
@@ -46,10 +46,10 @@ Or once, for every :class:`BSDateField` in the project::
 
     class MyAppConfig(AppConfig):
         def ready(self):
-            from django_bikram.django.admin import register_list_filter
+            from django_bikram_sambat.django.admin import register_list_filter
             register_list_filter()
 
-As with :func:`django_bikram.django.drf.register_serializer_field`, the global
+As with :func:`django_bikram_sambat.django.drf.register_serializer_field`, the global
 form is not applied on import: it mutates a third-party registry, and doing that
 as an import side effect makes behaviour depend on module import order.
 
@@ -319,7 +319,7 @@ def register_list_filter(take_priority: bool = True) -> None:
 
         class MyAppConfig(AppConfig):
             def ready(self):
-                from django_bikram.django.admin import register_list_filter
+                from django_bikram_sambat.django.admin import register_list_filter
                 register_list_filter()
 
     It is not called on import: it mutates a third-party registry, and doing

@@ -8,10 +8,10 @@ import pickle
 
 import pytest
 
-import django_bikram.date
-from django_bikram import BSDate
-from django_bikram.date import NEPAL_TZ
-from django_bikram.exceptions import BikramError, DateOutOfRange, InvalidBSDate
+import django_bikram_sambat.date
+from django_bikram_sambat import BSDate
+from django_bikram_sambat.date import NEPAL_TZ
+from django_bikram_sambat.exceptions import BikramError, DateOutOfRange, InvalidBSDate
 
 
 def test_components_are_exposed() -> None:
@@ -101,7 +101,7 @@ def test_today_is_nepal_local_not_process_local(monkeypatch: pytest.MonkeyPatch)
         def now(cls, tz: datetime.tzinfo | None = None) -> datetime.datetime:
             return instant.astimezone(tz)
 
-    monkeypatch.setattr(django_bikram.date.datetime, "datetime", _Frozen)
+    monkeypatch.setattr(django_bikram_sambat.date.datetime, "datetime", _Frozen)
 
     assert BSDate.today() == BSDate(2083, 4, 2)  # Nepal's day, not UTC's 2083-04-01
 
@@ -115,7 +115,7 @@ def test_today_accepts_an_explicit_timezone(monkeypatch: pytest.MonkeyPatch) -> 
         def now(cls, tz: datetime.tzinfo | None = None) -> datetime.datetime:
             return instant.astimezone(tz)
 
-    monkeypatch.setattr(django_bikram.date.datetime, "datetime", _Frozen)
+    monkeypatch.setattr(django_bikram_sambat.date.datetime, "datetime", _Frozen)
 
     assert BSDate.today(datetime.timezone.utc) == BSDate(2083, 4, 1)
     assert BSDate.today(NEPAL_TZ) == BSDate(2083, 4, 2)

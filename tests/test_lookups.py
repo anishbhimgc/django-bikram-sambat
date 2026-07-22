@@ -6,15 +6,15 @@ import datetime
 
 import pytest
 
-from django_bikram import BSDate
-from django_bikram.calendar_data import MAX_BS_YEAR, MIN_BS_YEAR
-from django_bikram.django.lookups import (
+from django_bikram_sambat import BSDate
+from django_bikram_sambat.calendar_data import MAX_BS_YEAR, MIN_BS_YEAR
+from django_bikram_sambat.django.lookups import (
     bs_month_bounds,
     bs_month_q,
     bs_year_bounds,
     bs_year_q,
 )
-from django_bikram.exceptions import DateOutOfRange, InvalidBSDate
+from django_bikram_sambat.exceptions import DateOutOfRange, InvalidBSDate
 
 from .models import Invoice
 

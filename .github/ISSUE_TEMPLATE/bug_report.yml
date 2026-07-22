@@ -1,5 +1,5 @@
 name: Bug report
-description: Something in django-bikram behaves incorrectly
+description: Something in django-bikram-sambat behaves incorrectly
 labels: ["bug"]
 body:
   - type: textarea
@@ -20,8 +20,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: django-bikram version
-      placeholder: "0.2.0  (python -c \"import django_bikram; print(django_bikram.__version__)\")"
+      label: django-bikram-sambat version
+      placeholder: "0.2.0  (python -c \"import django_bikram_sambat; print(django_bikram_sambat.__version__)\")"
     validations:
       required: true
   - type: input

@@ -12,10 +12,10 @@ import datetime
 
 import pytest
 
-from django_bikram import BSDate
-from django_bikram.calendar_data import VERIFIED_MAX_BS_YEAR, VERIFIED_MIN_BS_YEAR
-from django_bikram.exceptions import DateOutOfRange, InvalidBSDate
-from django_bikram.fiscal import (
+from django_bikram_sambat import BSDate
+from django_bikram_sambat.calendar_data import VERIFIED_MAX_BS_YEAR, VERIFIED_MIN_BS_YEAR
+from django_bikram_sambat.exceptions import DateOutOfRange, InvalidBSDate
+from django_bikram_sambat.fiscal import (
     FISCAL_START_MONTH,
     fiscal_quarter,
     fiscal_quarter_bounds,

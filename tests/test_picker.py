@@ -13,18 +13,18 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from django_bikram import BSDate
-from django_bikram.calendar_data import VERIFIED_BS_MONTH_DAYS, VERIFIED_MIN_BS_YEAR
-from django_bikram.django.forms import (
+from django_bikram_sambat import BSDate
+from django_bikram_sambat.calendar_data import VERIFIED_BS_MONTH_DAYS, VERIFIED_MIN_BS_YEAR
+from django_bikram_sambat.django.forms import (
     BSDateField,
     BSDateInput,
     BSDatePickerInput,
     encode_verified_calendar,
 )
 
-STATIC = Path(__file__).resolve().parent.parent / "django_bikram" / "static"
-PICKER_JS = STATIC / "django_bikram" / "bs-datepicker.js"
-PICKER_CSS = STATIC / "django_bikram" / "bs-datepicker.css"
+STATIC = Path(__file__).resolve().parent.parent / "django_bikram_sambat" / "static"
+PICKER_JS = STATIC / "django_bikram_sambat" / "bs-datepicker.js"
+PICKER_CSS = STATIC / "django_bikram_sambat" / "bs-datepicker.css"
 
 
 # --- the encoded calendar ----------------------------------------------
@@ -44,7 +44,7 @@ def test_shipped_calendar_matches_python() -> None:
     """The static file's calendar must equal the Python table.
 
     If this fails, the calendar was extended without regenerating
-    django_bikram/static/django_bikram/bs-datepicker.js -- the browser would
+    django_bikram_sambat/static/django_bikram_sambat/bs-datepicker.js -- the browser would
     disagree with the server about month lengths, which is the one bug this
     package cannot tolerate. Rebuild the MONTHS literal from
     encode_verified_calendar().
@@ -109,8 +109,8 @@ def test_panel_is_positioned_from_javascript() -> None:
 def test_picker_declares_its_media() -> None:
     """Django's Media handles deduplication across many fields on a page."""
     media = str(BSDatePickerInput().media)
-    assert "django_bikram/bs-datepicker.js" in media
-    assert "django_bikram/bs-datepicker.css" in media
+    assert "django_bikram_sambat/bs-datepicker.js" in media
+    assert "django_bikram_sambat/bs-datepicker.css" in media
 
 
 def test_picker_renders_its_hooks() -> None:
@@ -205,6 +205,6 @@ def test_picker_round_trips_through_a_form() -> None:
 
 def test_app_config_is_importable() -> None:
     """The picker's static assets are only discoverable via an installed app."""
-    from django_bikram.apps import DjangoBikramConfig
+    from django_bikram_sambat.apps import DjangoBikramConfig
 
-    assert DjangoBikramConfig.name == "django_bikram"
+    assert DjangoBikramConfig.name == "django_bikram_sambat"

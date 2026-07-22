@@ -8,8 +8,8 @@ import pytest
 from django import forms
 from django.core.exceptions import ValidationError
 
-from django_bikram import BSDate
-from django_bikram.django.forms import BSDateField, BSDateInput
+from django_bikram_sambat import BSDate
+from django_bikram_sambat.django.forms import BSDateField, BSDateInput
 
 from .models import Invoice
 

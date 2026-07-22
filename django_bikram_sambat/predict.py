@@ -3,8 +3,8 @@
 Read this before using anything here.
 =====================================
 
-The verified table (:mod:`django_bikram.calendar_data`) stops at
-:data:`~django_bikram.calendar_data.VERIFIED_MAX_BS_YEAR` BS because that is
+The verified table (:mod:`django_bikram_sambat.calendar_data`) stops at
+:data:`~django_bikram_sambat.calendar_data.VERIFIED_MAX_BS_YEAR` BS because that is
 where two independent published sources still agree. Beyond it, month lengths
 are *not published yet* -- the Panchanga Nirnayak Samiti sets them
 astronomically and releases them roughly a year ahead. This module fills that
@@ -38,8 +38,8 @@ What this means for you
 * Predicted years are **not installed into the calendar automatically**. Every
   BS date this package produces stays verified unless you opt in by hand -- see
   :func:`build_provisional_table` and the ``PROVISIONAL_BS_MONTH_DAYS`` note in
-  :mod:`django_bikram.calendar_data`. When a predicted year *is* installed, using
-  it raises :class:`~django_bikram.exceptions.ProvisionalDateWarning`.
+  :mod:`django_bikram_sambat.calendar_data`. When a predicted year *is* installed, using
+  it raises :class:`~django_bikram_sambat.exceptions.ProvisionalDateWarning`.
 
 The model
 ---------
@@ -176,7 +176,7 @@ def _ingress_jd(sign_index: int, guess_jd: float) -> float:
 def _month_start_ordinals(month_count: int) -> list[int]:
     """Return civil-day ordinals (from the anchor) of successive month starts.
 
-    Ordinal 0 is 1 Baishakh of :data:`~django_bikram.calendar_data.ANCHOR_AD`'s
+    Ordinal 0 is 1 Baishakh of :data:`~django_bikram_sambat.calendar_data.ANCHOR_AD`'s
     year. Each entry is the whole-day offset from the anchor at which a solar
     month begins, so consecutive differences are month lengths.
 
@@ -206,7 +206,7 @@ def _year_lengths(first_bs_year: int, year_count: int) -> dict[int, tuple[int, .
 
     Args:
         first_bs_year: The BS year the run starts at. Must be
-            :data:`~django_bikram.calendar_data.VERIFIED_MIN_BS_YEAR` or later,
+            :data:`~django_bikram_sambat.calendar_data.VERIFIED_MIN_BS_YEAR` or later,
             since the ingress walk is anchored there.
         year_count: How many consecutive years to compute.
 
@@ -232,12 +232,12 @@ def predicted_month_days(bs_year: int) -> tuple[int, ...]:
     The result is a prediction (see the module docstring): about one month in
     eight is a day out. For years within the verified range this still returns
     the *computed* value, which is the honest thing to expose from a predictor;
-    use :data:`~django_bikram.calendar_data.VERIFIED_BS_MONTH_DAYS` for the
+    use :data:`~django_bikram_sambat.calendar_data.VERIFIED_BS_MONTH_DAYS` for the
     attested lengths.
 
     Args:
         bs_year: A Bikram Sambat year at or after
-            :data:`~django_bikram.calendar_data.VERIFIED_MIN_BS_YEAR`.
+            :data:`~django_bikram_sambat.calendar_data.VERIFIED_MIN_BS_YEAR`.
 
     Returns:
         Twelve month lengths, Baishakh (index 0) through Chaitra.
@@ -265,10 +265,11 @@ def build_provisional_table(
     """Predict month lengths for every year past the verified range.
 
     This is the "give me the next hundred years" entry point. It returns a table
-    shaped exactly like :data:`~django_bikram.calendar_data.VERIFIED_BS_MONTH_DAYS`,
-    covering ``VERIFIED_MAX_BS_YEAR + 1`` through ``through_year`` inclusive, so
-    it can be dropped straight into
-    :data:`~django_bikram.calendar_data.PROVISIONAL_BS_MONTH_DAYS`.
+    shaped exactly like
+    :data:`~django_bikram_sambat.calendar_data.VERIFIED_BS_MONTH_DAYS`,
+    covering ``VERIFIED_MAX_BS_YEAR + 1`` through ``through_year`` inclusive,
+    so it can be dropped straight into
+    :data:`~django_bikram_sambat.calendar_data.PROVISIONAL_BS_MONTH_DAYS`.
 
     Every row it returns is a prediction. Each is internally consistent (twelve
     months totalling 365 or 366 days), but individual month lengths carry the
@@ -305,7 +306,7 @@ def validate() -> dict[str, object]:
     """Re-derive the predictor's accuracy against the verified years.
 
     Runs the model over the whole verified range and compares it, month by
-    month, to :data:`~django_bikram.calendar_data.VERIFIED_BS_MONTH_DAYS`. This
+    month, to :data:`~django_bikram_sambat.calendar_data.VERIFIED_BS_MONTH_DAYS`. This
     is the number to trust -- and to re-run if the constants ever change -- not
     a claim in a docstring.
 

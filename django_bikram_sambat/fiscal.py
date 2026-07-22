@@ -6,17 +6,17 @@ named for the year it *starts* in, written with the ending year's last two
 digits: the year beginning 1 Shrawan 2081 is **FY 2081/82**.
 
 Everything here derives from that one rule, so there is no second calendar table
-to keep in step with :mod:`django_bikram.calendar_data`.
+to keep in step with :mod:`django_bikram_sambat.calendar_data`.
 
 Why this is not a "just add 3 months" helper
 --------------------------------------------
 The fiscal year is a contiguous span of days, and the only correct way to select
 it from a database is a half-open range over the indexed column -- exactly as for
 a BS year. :func:`fiscal_year_bounds` returns those Gregorian bounds;
-:func:`django_bikram.django.lookups.bs_fiscal_year_q` wraps them in a ``Q``.
+:func:`django_bikram_sambat.django.lookups.bs_fiscal_year_q` wraps them in a ``Q``.
 Deriving a fiscal year *per row* in SQL would need the BS calendar table inlined
 into the query, with the same sequential-scan cost documented in
-:mod:`django_bikram.django.lookups`.
+:mod:`django_bikram_sambat.django.lookups`.
 
 Quarters follow the Nepali government's convention, which is simply the fiscal
 year cut into four three-month blocks:
@@ -73,7 +73,7 @@ def fiscal_year(value: BSDate) -> int:
         The starting BS year of the fiscal year containing ``value``.
 
     Example:
-        >>> from django_bikram import BSDate
+        >>> from django_bikram_sambat import BSDate
         >>> fiscal_year(BSDate(2081, 4, 1))    # 1 Shrawan: the year opens
         2081
         >>> fiscal_year(BSDate(2081, 3, 31))   # Ashadh: still the year before
@@ -95,7 +95,7 @@ def fiscal_year_label(value: BSDate) -> str:
         year in full, then the ending year's last two digits.
 
     Example:
-        >>> from django_bikram import BSDate
+        >>> from django_bikram_sambat import BSDate
         >>> fiscal_year_label(BSDate(2081, 4, 1))
         '2081/82'
         >>> fiscal_year_label(BSDate(2081, 3, 31))
@@ -119,7 +119,7 @@ def fiscal_quarter(value: BSDate) -> int:
         The quarter number, 1 through 4.
 
     Example:
-        >>> from django_bikram import BSDate
+        >>> from django_bikram_sambat import BSDate
         >>> fiscal_quarter(BSDate(2081, 4, 1))    # Shrawan
         1
         >>> fiscal_quarter(BSDate(2081, 10, 1))   # Magh
@@ -137,7 +137,7 @@ def fiscal_year_bounds(start_year: int) -> tuple[datetime.date, datetime.date]:
     The range is half-open -- ``start <= d < end`` -- so consecutive fiscal
     years tile exactly, with no overlap and no month-length special cases. This
     is the form that keeps a database index in play; see
-    :mod:`django_bikram.django.lookups`.
+    :mod:`django_bikram_sambat.django.lookups`.
 
     Args:
         start_year: The BS year the fiscal year starts in -- 2081 for FY

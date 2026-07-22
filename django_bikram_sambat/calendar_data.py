@@ -45,7 +45,7 @@ confirmed against Hamro Patro (see above); from 2085 on there is no such check:
 
 Extrapolated data would be silently wrong rather than loudly absent, so by
 default dates outside the verified range raise
-:class:`~django_bikram.exceptions.DateOutOfRange`.
+:class:`~django_bikram_sambat.exceptions.DateOutOfRange`.
 
 Two tiers: verified and provisional
 -----------------------------------
@@ -54,16 +54,16 @@ The data is split so that "attested" and "computed" never blur together:
 * :data:`VERIFIED_BS_MONTH_DAYS` -- the two-source table above, the default and
   the correctness core.
 * :data:`PROVISIONAL_BS_MONTH_DAYS` -- **empty by default**. A place for
-  *computed* years produced by :mod:`django_bikram.predict`, for projects that
+  *computed* years produced by :mod:`django_bikram_sambat.predict`, for projects that
   must keep working past the verified horizon and can accept that a predicted
   month length is right about seven times in eight (see that module's
   ``validate()``). Opt in by setting the :data:`PROVISIONAL_ENV_VAR` environment
   variable, or by calling :func:`install_provisional` at startup.
 
 :data:`BS_MONTH_DAYS` is the merged working table the conversion code runs over.
-:func:`is_verified_year` and :attr:`django_bikram.date.BSDate.is_verified` report
+:func:`is_verified_year` and :attr:`django_bikram_sambat.date.BSDate.is_verified` report
 which tier a date came from, and using a provisional date raises
-:class:`~django_bikram.exceptions.ProvisionalDateWarning`.
+:class:`~django_bikram_sambat.exceptions.ProvisionalDateWarning`.
 
 Extending the *verified* table
 ------------------------------
@@ -253,10 +253,10 @@ VERIFIED_BS_MONTH_DAYS: dict[int, tuple[int, ...]] = {
 #: Provisional (computed) month lengths for years beyond the verified range.
 #:
 #: **Empty by default** -- the package ships no unverified data. It may be
-#: populated from :mod:`django_bikram.predict`, whose output is *astronomically
+#: populated from :mod:`django_bikram_sambat.predict`, whose output is *astronomically
 #: predicted*, not attested. Each provisional year must stay contiguous with the
 #: verified range and total 365 or 366 days. Using a provisional date is allowed
-#: but raises :class:`~django_bikram.exceptions.ProvisionalDateWarning`, because
+#: but raises :class:`~django_bikram_sambat.exceptions.ProvisionalDateWarning`, because
 #: a predicted month length can differ from the eventual official one by a day.
 PROVISIONAL_BS_MONTH_DAYS: dict[int, tuple[int, ...]] = {}
 
@@ -325,11 +325,11 @@ def install_provisional(table: dict[int, tuple[int, ...]]) -> None:
 
     This is the one supported way to make the package accept dates past the
     verified range. It appends ``table`` -- typically from
-    :func:`django_bikram.predict.build_provisional_table` -- to
+    :func:`django_bikram_sambat.predict.build_provisional_table` -- to
     :data:`PROVISIONAL_BS_MONTH_DAYS`, rebuilds the merged
     :data:`BS_MONTH_DAYS`, extends :data:`MAX_BS_YEAR` / :data:`MAX_AD_DATE`, and
-    refreshes the caches in :mod:`~django_bikram.convert` and the
-    :attr:`~django_bikram.date.BSDate.max` bound.
+    refreshes the caches in :mod:`~django_bikram_sambat.convert` and the
+    :attr:`~django_bikram_sambat.date.BSDate.max` bound.
 
     **Run it once, at startup, before the first date operation, and not
     concurrently with any conversion.** It mutates process-global tables in
@@ -339,7 +339,7 @@ def install_provisional(table: dict[int, tuple[int, ...]]) -> None:
     :data:`PROVISIONAL_ENV_VAR` environment variable, which triggers exactly this
     at import -- the point at which it is unambiguously safe. Installed years
     remain flagged: constructing or converting one raises
-    :class:`~django_bikram.exceptions.ProvisionalDateWarning`, and
+    :class:`~django_bikram_sambat.exceptions.ProvisionalDateWarning`, and
     :func:`is_verified_year` reports ``False`` for it.
 
     Args:
@@ -353,7 +353,7 @@ def install_provisional(table: dict[int, tuple[int, ...]]) -> None:
             silently corrupting every conversion.
 
     Example:
-        >>> from django_bikram.predict import build_provisional_table
+        >>> from django_bikram_sambat.predict import build_provisional_table
         >>> install_provisional(build_provisional_table(MAX_BS_YEAR + 5))
         ... # doctest: +SKIP
     """

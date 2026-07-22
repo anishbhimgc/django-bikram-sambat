@@ -25,16 +25,16 @@ jobs:
       - run: python -m pip install --upgrade pip
       - run: pip install -e ".[dev]"
       - name: Ruff
-        run: ruff check django_bikram/
+        run: ruff check django_bikram_sambat/
       - name: Mypy (strict)
-        run: mypy django_bikram/
+        run: mypy django_bikram_sambat/
       - name: Doctests
         run: >
           pytest --doctest-modules
-          django_bikram/date.py django_bikram/convert.py
-          django_bikram/formatting.py django_bikram/exceptions.py
-          django_bikram/calendar_data.py django_bikram/predict.py
-          django_bikram/sources.py django_bikram/fiscal.py -q
+          django_bikram_sambat/date.py django_bikram_sambat/convert.py
+          django_bikram_sambat/formatting.py django_bikram_sambat/exceptions.py
+          django_bikram_sambat/calendar_data.py django_bikram_sambat/predict.py
+          django_bikram_sambat/sources.py django_bikram_sambat/fiscal.py -q
 
   test:
     name: py${{ matrix.python-version }} · Django ${{ matrix.django }}

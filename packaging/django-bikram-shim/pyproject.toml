@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "django-bikram"
+version = "0.4.0"
+description = "Renamed to django-bikram-sambat. This package re-exports it and will not be updated."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "Anish Gharti", email = "anishbhimgc@gmail.com" }]
+classifiers = ["Development Status :: 7 - Inactive"]
+dependencies = ["django-bikram-sambat>=0.4.0"]
+
+[project.urls]
+Homepage = "https://pypi.org/project/django-bikram-sambat/"
+Source = "https://github.com/anishbhimgc/django-bikram-sambat"
+
+[tool.hatch.build.targets.wheel]
+packages = ["django_bikram"]

@@ -1,1 +1,1 @@
-"""Test suite for django-bikram."""
+"""Test suite for django-bikram-sambat."""

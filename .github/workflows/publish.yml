@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/django-bikram
+      url: https://pypi.org/p/django-bikram-sambat
     permissions:
       id-token: write # OIDC token for Trusted Publishing
     steps:

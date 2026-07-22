@@ -1,21 +1,21 @@
-# django-bikram
+# django-bikram-sambat
 
-[![CI](https://github.com/anishbhimgc/django-bikram/actions/workflows/ci.yml/badge.svg)](https://github.com/anishbhimgc/django-bikram/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/django-bikram)](https://pypi.org/project/django-bikram/)
-[![Python versions](https://img.shields.io/pypi/pyversions/django-bikram)](https://pypi.org/project/django-bikram/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/anishbhimgc/django-bikram/blob/main/LICENSE)
+[![CI](https://github.com/anishbhimgc/django-bikram-sambat/actions/workflows/ci.yml/badge.svg)](https://github.com/anishbhimgc/django-bikram-sambat/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/django-bikram-sambat)](https://pypi.org/project/django-bikram-sambat/)
+[![Python versions](https://img.shields.io/pypi/pyversions/django-bikram-sambat)](https://pypi.org/project/django-bikram-sambat/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/anishbhimgc/django-bikram-sambat/blob/main/LICENSE)
 [![Types: mypy strict](https://img.shields.io/badge/types-mypy%20strict-blue)](https://mypy-lang.org/)
 [![Lint: ruff](https://img.shields.io/badge/lint-ruff-261230)](https://github.com/astral-sh/ruff)
 
 Bikram Sambat (Nepali) dates for Python, with first-class Django and DRF
 integration.
 
-> **New here?** Start with the **[Quickstart](https://github.com/anishbhimgc/django-bikram/blob/main/docs/quickstart.md)**.
+> **New here?** Start with the **[Quickstart](https://github.com/anishbhimgc/django-bikram-sambat/blob/main/docs/quickstart.md)**.
 >
-> 🇳🇵 नेपालीमा: [README.ne.md](https://github.com/anishbhimgc/django-bikram/blob/main/README.ne.md) · [छिटो सुरु गर्ने मार्गदर्शन](https://github.com/anishbhimgc/django-bikram/blob/main/docs/quickstart.ne.md)
+> 🇳🇵 नेपालीमा: [README.ne.md](https://github.com/anishbhimgc/django-bikram-sambat/blob/main/README.ne.md) · [छिटो सुरु गर्ने मार्गदर्शन](https://github.com/anishbhimgc/django-bikram-sambat/blob/main/docs/quickstart.ne.md)
 
 ```python
-from django_bikram import BSDate
+from django_bikram_sambat import BSDate
 
 BSDate(2081, 1, 1).to_ad()              # datetime.date(2024, 4, 13)
 BSDate.from_ad(datetime.date(2024, 4, 13))  # BSDate(2081, 1, 1)
@@ -24,7 +24,7 @@ BSDate.today().strftime("%d %B %Y", lang="ne", numerals="devanagari")
 
 ```python
 from django.db import models
-from django_bikram.django import BSDateField
+from django_bikram_sambat.django import BSDateField
 
 class Invoice(models.Model):
     issued_on = BSDateField()           # a real DATE column underneath
@@ -50,7 +50,7 @@ They *can* be approximated by computation — but not exactly, and that gap is t
 whole point. A Surya-Siddhanta model of the sun (the same reckoning the official
 calendar uses) reproduces the verified years to only **~87% of months, the
 rest off by exactly one day, and just 58 of 110 years fully correct** (re-run it
-yourself: `python -c "from django_bikram.predict import validate; print(validate())"`).
+yourself: `python -c "from django_bikram_sambat.predict import validate; print(validate())"`).
 The residual is the traditional day-boundary rule plus the committee's occasional
 manual corrections — real, and not tunable away. So computed years are shipped as
 a clearly-marked **provisional** tier, never as fact.
@@ -58,40 +58,45 @@ a clearly-marked **provisional** tier, never as fact.
 If April 2028 is too close for you (it is, for anything long-lived), you have
 two honest options — see [Living past 2084](#living-past-2084).
 
-### 2. Distribution name vs. import name
+### 2. Renamed from `django-bikram` in 0.4.0
 
-You **install** `django-bikram` but you **import** `django_bikram`:
+If you installed `django-bikram`, the package is now **`django-bikram-sambat`**
+and the import is **`django_bikram_sambat`**:
 
 ```bash
-pip install django-bikram
+pip uninstall django-bikram
+pip install django-bikram-sambat
 ```
 ```python
-from django_bikram import BSDate
+from django_bikram_sambat import BSDate          # was: django_bikram
 ```
 
-This is deliberate. An earlier revision used a top-level `bikram` import
-package, but PyPI already hosts a **different** project literally named
+Nothing else changed — same API, same data, same behaviour. A find-and-replace
+of `django_bikram` → `django_bikram_sambat` is the whole migration. The old name
+still installs and simply re-exports this package, so existing code keeps
+working, but it will not receive further releases.
+
+The rename spells out the calendar. "Bikram" alone is a common Nepali given
+name, so `django-bikram` was ambiguous in search and told you nothing about what
+the package does.
+
+The import package is deliberately **not** `bikram`: PyPI already hosts a
+different project literally named
 [`bikram`](https://pypi.org/project/bikram/) (v2.1.4, "Utilities to work with
 Bikram/Vikram Samwat dates") which installs its own top-level `bikram/`
-directory. Two packages claiming the same import name means installing both
-silently overwrites one, with no warning from pip. The import package is
-therefore `django_bikram`, which matches the distribution name and collides with
-nothing.
-
-Before you upload, still **re-check the distribution name is free** — a `GET`
-to `https://pypi.org/pypi/django-bikram/json` returning 404 means it is
-available; names get taken.
+directory. Two packages claiming one import name means installing both silently
+overwrites one, with no warning from pip.
 
 ---
 
 ## Installation
 
 ```bash
-pip install django-bikram          # core + Django integration
-pip install django-bikram[drf]     # also pulls in djangorestframework
+pip install django-bikram-sambat          # core + Django integration
+pip install django-bikram-sambat[drf]     # also pulls in djangorestframework
 ```
 
-Requires Python 3.10+. Django is only needed for `django_bikram.django`; the core
+Requires Python 3.10+. Django is only needed for `django_bikram_sambat.django`; the core
 `BSDate` type has **no dependencies at all**.
 
 ---
@@ -173,7 +178,7 @@ ships helpers instead — a BS year *is* a contiguous span of AD dates, and
 saying so directly keeps the index in play:
 
 ```python
-from django_bikram.django.lookups import bs_year_q, bs_month_q, bs_year_bounds
+from django_bikram_sambat.django.lookups import bs_year_q, bs_month_q, bs_year_bounds
 
 Invoice.objects.filter(bs_year_q("issued_on", 2081))
 Invoice.objects.filter(bs_month_q("issued_on", 2081, 1))
@@ -205,8 +210,8 @@ Because a fiscal year spans two BS years, no combination of built-in lookups
 expresses it — so it gets the same half-open range treatment as a BS year:
 
 ```python
-from django_bikram.django.lookups import bs_fiscal_year_q, bs_fiscal_quarter_q
-from django_bikram.fiscal import fiscal_year_bounds
+from django_bikram_sambat.django.lookups import bs_fiscal_year_q, bs_fiscal_quarter_q
+from django_bikram_sambat.fiscal import fiscal_year_bounds
 
 Invoice.objects.filter(bs_fiscal_year_q("issued_on", 2081))
 Invoice.objects.filter(bs_fiscal_quarter_q("issued_on", 2081, 1))
@@ -302,7 +307,7 @@ d.strftime("%A, %d %B %Y", lang="ne", numerals="devanagari")  # 'शनिबा
 Parsing accepts either numeral system by default (`numerals="auto"`):
 
 ```python
-from django_bikram import parse_bs
+from django_bikram_sambat import parse_bs
 parse_bs("२०८१-०१-०१", "%Y-%m-%d")        # (2081, 1, 1)
 parse_bs("०१ वैशाख २०८१", "%d %B %Y", lang="ne")
 ```
@@ -317,7 +322,7 @@ parse_bs("०१ वैशाख २०८१", "%d %B %Y", lang="ne")
 ### Model field
 
 ```python
-from django_bikram.django import BSDateField
+from django_bikram_sambat.django import BSDateField
 
 class Invoice(models.Model):
     issued_on  = BSDateField(db_index=True)
@@ -342,7 +347,7 @@ emits BS strings, and `loaddata` reads them back.
 ### Forms
 
 ```python
-from django_bikram.django.forms import BSDateField, BSDateInput
+from django_bikram_sambat.django.forms import BSDateField, BSDateInput
 
 class InvoiceForm(forms.ModelForm):
     class Meta:
@@ -379,7 +384,7 @@ Use the BS-aware filter instead. It offers *Today*, *Past 7 days*, *This month*,
 and it parses its own bounds back as Gregorian so the buckets actually select:
 
 ```python
-from django_bikram.django.admin import BSDateFieldListFilter
+from django_bikram_sambat.django.admin import BSDateFieldListFilter
 
 class InvoiceAdmin(admin.ModelAdmin):
     list_filter = [("issued_on", BSDateFieldListFilter)]
@@ -390,7 +395,7 @@ Or make it the default for every `BSDateField` in the project:
 ```python
 class MyAppConfig(AppConfig):
     def ready(self):
-        from django_bikram.django.admin import register_list_filter
+        from django_bikram_sambat.django.admin import register_list_filter
         register_list_filter()
 ```
 
@@ -404,11 +409,11 @@ filter above.
 ```python
 # settings.py — required for the picker only; the rest of the package
 # needs no app registration.
-INSTALLED_APPS = [..., "django_bikram"]
+INSTALLED_APPS = [..., "django_bikram_sambat"]
 ```
 
 ```python
-from django_bikram.django import BSDatePickerInput
+from django_bikram_sambat.django import BSDatePickerInput
 
 widgets = {"issued_on": BSDatePickerInput(lang="ne", numerals="devanagari")}
 ```
@@ -428,7 +433,7 @@ server-side exactly like typed input. Needs `django.contrib.staticfiles` and
 ### DRF
 
 ```python
-from django_bikram.django.drf import BSDateField
+from django_bikram_sambat.django.drf import BSDateField
 
 class InvoiceSerializer(serializers.ModelSerializer):
     issued_on = BSDateField()
@@ -444,7 +449,7 @@ the wrong calendar. Close that trap once at startup:
 ```python
 class MyAppConfig(AppConfig):
     def ready(self):
-        from django_bikram.django.drf import register_serializer_field
+        from django_bikram_sambat.django.drf import register_serializer_field
         register_serializer_field()
 ```
 
@@ -526,7 +531,7 @@ include a **364-day year**). This package will not pretend otherwise.
 When the Samiti publishes further years:
 
 1. Append the rows to `VERIFIED_BS_MONTH_DAYS` in
-   `django_bikram/calendar_data.py` and raise `VERIFIED_MAX_BS_YEAR`.
+   `django_bikram_sambat/calendar_data.py` and raise `VERIFIED_MAX_BS_YEAR`.
 2. Corroborate each new year against **at least two independent sources**.
 3. Run the suite — `tests/test_calendar_data.py` enforces the 365/366 total,
    the 29–32 month bound, and the anti-filler tail check;
@@ -555,28 +560,28 @@ Prefer to generate the numbers yourself, or wire them in from your own startup
 code? The predictor is a plain module:
 
 ```python
-from django_bikram.predict import build_provisional_table, validate
+from django_bikram_sambat.predict import build_provisional_table, validate
 
 validate()                       # the honest backtest: ~87% of months, ±1 day
 table = build_provisional_table(through_year=2183)   # {2084: (...), ... 2183: (...)}
 
-from django_bikram.calendar_data import install_provisional
+from django_bikram_sambat.calendar_data import install_provisional
 install_provisional(table)       # call once at startup, before the first date op
 ```
 
 The model is Surya-Siddhanta solar longitude crossed against the sidereal signs,
 with two constants fit to the verified range. It is documented in
-`django_bikram/predict.py`, caveats and all. **Do not use provisional dates where
+`django_bikram_sambat/predict.py`, caveats and all. **Do not use provisional dates where
 a one-day error matters** (due dates, legal deadlines); do use them for planning
 and display, and replace them with verified rows the moment they publish.
 
 **A second source, if you prefer it.** `bikram-sambat` (MIT) ships its own table
-to 2199 BS. Install `django-bikram[bikram-sambat]` and use it in place of the
+to 2199 BS. Install `django-bikram-sambat[bikram-sambat]` and use it in place of the
 predictor:
 
 ```python
-from django_bikram.sources import bikram_sambat_table
-from django_bikram.calendar_data import install_provisional
+from django_bikram_sambat.sources import bikram_sambat_table
+from django_bikram_sambat.calendar_data import install_provisional
 install_provisional(bikram_sambat_table(through_year=2150))
 ```
 
@@ -588,7 +593,7 @@ To silence or harden the warning globally:
 
 ```python
 import warnings
-from django_bikram import ProvisionalDateWarning
+from django_bikram_sambat import ProvisionalDateWarning
 warnings.filterwarnings("ignore", category=ProvisionalDateWarning)  # quiet
 warnings.filterwarnings("error",  category=ProvisionalDateWarning)  # strict again
 ```
@@ -600,8 +605,8 @@ warnings.filterwarnings("error",  category=ProvisionalDateWarning)  # strict aga
 ```bash
 pip install -e ".[dev]"
 pytest
-ruff check django_bikram/
-mypy django_bikram/
+ruff check django_bikram_sambat/
+mypy django_bikram_sambat/
 ```
 
 ---
@@ -609,7 +614,7 @@ mypy django_bikram/
 ## Migrating from another package
 
 Coming from `django-nepali-datetime-field`, `django-npdt`, or hand-rolled
-string/integer storage? See **[docs/migrating.md](https://github.com/anishbhimgc/django-bikram/blob/main/docs/migrating.md)**.
+string/integer storage? See **[docs/migrating.md](https://github.com/anishbhimgc/django-bikram-sambat/blob/main/docs/migrating.md)**.
 
 If you are on `django-nepali-datetime-field` the storage is already compatible —
 it is a field swap with **no data migration**.
@@ -626,4 +631,4 @@ it is a field swap with **no data migration**.
 
 ## License
 
-MIT. See [LICENSE](https://github.com/anishbhimgc/django-bikram/blob/main/LICENSE).
+MIT. See [LICENSE](https://github.com/anishbhimgc/django-bikram-sambat/blob/main/LICENSE).

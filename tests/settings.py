@@ -1,6 +1,6 @@
 """Minimal Django settings for the test suite."""
 
-SECRET_KEY = "django-bikram-test-key-not-secret"
+SECRET_KEY = "django-bikram-sambat-test-key-not-secret"
 
 DATABASES = {
     "default": {
@@ -12,7 +12,7 @@ DATABASES = {
 INSTALLED_APPS = [
     # admin, sessions, messages and staticfiles are here so the admin
     # integration (the list filter and the widget swap) is exercised against a
-    # real ModelAdmin rather than a mock. django_bikram itself is installed so
+    # real ModelAdmin rather than a mock. django_bikram_sambat itself is installed so
     # the picker's static assets are discoverable, exactly as a project using
     # the picker must do.
     "django.contrib.admin",
@@ -21,7 +21,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.sessions",
     "django.contrib.staticfiles",
-    "django_bikram",
+    "django_bikram_sambat",
     "tests",
 ]
 

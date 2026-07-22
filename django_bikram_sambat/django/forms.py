@@ -124,7 +124,7 @@ def encode_verified_calendar() -> str:
     """Encode the verified month-length table as one compact ASCII string.
 
     Twelve characters per year, starting at
-    :data:`~django_bikram.calendar_data.VERIFIED_MIN_BS_YEAR`, each holding
+    :data:`~django_bikram_sambat.calendar_data.VERIFIED_MIN_BS_YEAR`, each holding
     ``days - 29``. Month lengths are always 29 to 32, so every month fits in a
     single digit ``0``-``3`` and the whole 110-year calendar costs ~1.3 kB --
     small enough for the browser to do real Bikram Sambat arithmetic rather than
@@ -182,8 +182,8 @@ class BSDatePickerInput(BSDateInput):
     class Media:
         """Static assets for the picker, deduplicated by Django's ``Media``."""
 
-        css = {"all": ("django_bikram/bs-datepicker.css",)}
-        js = ("django_bikram/bs-datepicker.js",)
+        css = {"all": ("django_bikram_sambat/bs-datepicker.css",)}
+        js = ("django_bikram_sambat/bs-datepicker.js",)
 
     def get_context(
         self, name: str, value: Any, attrs: dict[str, Any] | None

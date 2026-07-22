@@ -18,10 +18,10 @@ from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
 from django.test import RequestFactory
 
-from django_bikram import BSDate
-from django_bikram.django.admin import BSDateFieldListFilter
-from django_bikram.django.lookups import bs_month_bounds, bs_year_bounds
-from django_bikram.fiscal import fiscal_year_bounds
+from django_bikram_sambat import BSDate
+from django_bikram_sambat.django.admin import BSDateFieldListFilter
+from django_bikram_sambat.django.lookups import bs_month_bounds, bs_year_bounds
+from django_bikram_sambat.fiscal import fiscal_year_bounds
 
 from .models import Invoice
 
@@ -198,8 +198,8 @@ def test_bs_filter_omits_buckets_past_the_table_rather_than_guessing() -> None:
     bucket to become unbuildable. Rather than raise -- which would break the
     whole changelist -- the filter simply does not offer it.
     """
-    from django_bikram.calendar_data import VERIFIED_MAX_BS_YEAR
-    from django_bikram.exceptions import DateOutOfRange
+    from django_bikram_sambat.calendar_data import VERIFIED_MAX_BS_YEAR
+    from django_bikram_sambat.exceptions import DateOutOfRange
 
     with pytest.raises(DateOutOfRange):
         fiscal_year_bounds(VERIFIED_MAX_BS_YEAR)
@@ -217,7 +217,7 @@ def test_register_list_filter_takes_priority_over_django() -> None:
     Django's DateField test is registered first and the first match wins, so a
     registration without take_priority would silently do nothing.
     """
-    from django_bikram.django.admin import register_list_filter
+    from django_bikram_sambat.django.admin import register_list_filter
 
     saved = list(FieldListFilter._field_list_filters)
     saved_index = FieldListFilter._take_priority_index

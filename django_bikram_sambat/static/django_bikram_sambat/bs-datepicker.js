@@ -1,12 +1,12 @@
 /*!
- * django-bikram Bikram Sambat date picker.
+ * django-bikram-sambat Bikram Sambat date picker.
  *
  * No dependencies, no build step, no CDN. Attaches to any input carrying the
  * class "bs-datepicker" and reads its configuration from data- attributes, so
  * several fields on one page can differ in language and numerals.
  *
  * The calendar table below is generated from the same verified data the Python
- * side uses (django_bikram.django.forms.encode_verified_calendar); a test in
+ * side uses (django_bikram_sambat.django.forms.encode_verified_calendar); a test in
  * the package asserts this file still matches it, so the two cannot drift.
  */
 (function () {
@@ -22,7 +22,7 @@
   var ANCHOR = Date.UTC(1918, 3, 13);
   var DAY_MS = 86400000;
   // Nepal Standard Time, UTC+05:45 -- fixed, no DST, so "today in Nepal" is
-  // just a shifted UTC read. Matches django_bikram.date.NEPAL_TZ.
+  // just a shifted UTC read. Matches django_bikram_sambat.date.NEPAL_TZ.
   var NPT_OFFSET_MS = (5 * 60 + 45) * 60000;
 
   var NAMES = {
@@ -41,7 +41,7 @@
   };
   var DEV_DIGITS = "०१२३४५६७८९";
 
-  // --- calendar arithmetic (mirrors django_bikram.convert) ------------------
+  // --- calendar arithmetic (mirrors django_bikram_sambat.convert) ------------------
 
   function daysInMonth(year, month) {
     return MONTHS.charCodeAt((year - MIN_YEAR) * MONTHS_IN_YEAR + month - 1) - 48 + 29;
@@ -85,7 +85,7 @@
     return adToBs(new Date(Date.now() + NPT_OFFSET_MS));
   }
 
-  // --- formatting (mirrors django_bikram.formatting) ------------------------
+  // --- formatting (mirrors django_bikram_sambat.formatting) ------------------------
 
   function pad(n, width) {
     var s = String(n);

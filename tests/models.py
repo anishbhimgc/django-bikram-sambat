@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from django.db import models
 
-from django_bikram.django import BSDateField
+from django_bikram_sambat.django import BSDateField
 
 
 class Invoice(models.Model):

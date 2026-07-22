@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import pytest
 
-from django_bikram import BSDate
-from django_bikram.calendar_data import BS_MONTH_DAYS, MAX_BS_YEAR, MIN_BS_YEAR
-from django_bikram.exceptions import InvalidBSDate
-from django_bikram.formatting import (
+from django_bikram_sambat import BSDate
+from django_bikram_sambat.calendar_data import BS_MONTH_DAYS, MAX_BS_YEAR, MIN_BS_YEAR
+from django_bikram_sambat.exceptions import InvalidBSDate
+from django_bikram_sambat.formatting import (
     MONTH_ABBRS,
     MONTH_NAMES,
     WEEKDAY_ABBRS,

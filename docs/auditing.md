@@ -167,7 +167,7 @@ original bug.
 For a proper Bikram Sambat calendar in the admin, use the bundled picker:
 
 ```python
-from django_bikram.django import BSDatePickerInput
+from django_bikram_sambat.django import BSDatePickerInput
 ```
 
 See [Date picker](../README.md#date-picker).

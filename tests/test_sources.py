@@ -13,9 +13,9 @@ import textwrap
 
 import pytest
 
-from django_bikram.calendar_data import MONTHS_IN_YEAR, VERIFIED_MAX_BS_YEAR
-from django_bikram.predict import predicted_month_days
-from django_bikram.sources import bikram_sambat_table
+from django_bikram_sambat.calendar_data import MONTHS_IN_YEAR, VERIFIED_MAX_BS_YEAR
+from django_bikram_sambat.predict import predicted_month_days
+from django_bikram_sambat.sources import bikram_sambat_table
 
 
 def test_table_covers_the_requested_span() -> None:
@@ -79,10 +79,10 @@ def test_installs_as_an_alternative_provisional_source() -> None:
     out = _run(
         """
         import warnings
-        import django_bikram as b
-        from django_bikram import BSDate, ProvisionalDateWarning
-        from django_bikram.calendar_data import install_provisional
-        from django_bikram.sources import bikram_sambat_table
+        import django_bikram_sambat as b
+        from django_bikram_sambat import BSDate, ProvisionalDateWarning
+        from django_bikram_sambat.calendar_data import install_provisional
+        from django_bikram_sambat.sources import bikram_sambat_table
         install_provisional(bikram_sambat_table(through_year=2100))
         assert b.MAX_BS_YEAR == 2100, b.MAX_BS_YEAR
         with warnings.catch_warnings(record=True) as caught:

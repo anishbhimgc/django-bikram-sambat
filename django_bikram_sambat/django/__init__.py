@@ -1,10 +1,10 @@
-"""Django integration for :mod:`django_bikram`.
+"""Django integration for :mod:`django_bikram_sambat`.
 
 Model and form fields are re-exported here for convenience::
 
-    from django_bikram.django import BSDateField
+    from django_bikram_sambat.django import BSDateField
 
-:mod:`django_bikram.django.drf` is **not** re-exported: it imports Django REST
+:mod:`django_bikram_sambat.django.drf` is **not** re-exported: it imports Django REST
 Framework, which is an optional extra, so importing it must stay an explicit
 choice rather than a side effect of touching this package.
 """

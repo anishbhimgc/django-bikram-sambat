@@ -18,12 +18,12 @@ import textwrap
 
 import pytest
 
-from django_bikram.calendar_data import (
+from django_bikram_sambat.calendar_data import (
     MONTHS_IN_YEAR,
     VERIFIED_MAX_BS_YEAR,
     install_provisional,
 )
-from django_bikram.predict import (
+from django_bikram_sambat.predict import (
     build_provisional_table,
     predicted_month_days,
     validate,
@@ -157,8 +157,8 @@ def test_env_var_activates_provisional_at_import() -> None:
     out = _run(
         """
         import warnings
-        import django_bikram as b
-        from django_bikram import BSDate, ProvisionalDateWarning
+        import django_bikram_sambat as b
+        from django_bikram_sambat import BSDate, ProvisionalDateWarning
         assert b.MAX_BS_YEAR == 2150, b.MAX_BS_YEAR
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")
@@ -179,11 +179,11 @@ def test_runtime_install_keeps_every_cached_view_consistent() -> None:
     """A startup install() call refreshes convert, date and the top-level echoes."""
     out = _run(
         """
-        import django_bikram as b
-        from django_bikram import BSDate
-        from django_bikram import calendar_data as cd, convert
-        from django_bikram import date as datemod
-        from django_bikram.predict import build_provisional_table
+        import django_bikram_sambat as b
+        from django_bikram_sambat import BSDate
+        from django_bikram_sambat import calendar_data as cd, convert
+        from django_bikram_sambat import date as datemod
+        from django_bikram_sambat.predict import build_provisional_table
         cd.install_provisional(build_provisional_table(through_year=2120))
         # every module's echo of the bound agrees -- no stale alias
         assert b.MAX_BS_YEAR == cd.MAX_BS_YEAR == convert.MAX_BS_YEAR == 2120
@@ -203,8 +203,8 @@ def test_default_import_has_no_provisional_years() -> None:
     """Without the opt-in, the package stays strictly verified-only."""
     out = _run(
         """
-        import django_bikram as b
-        from django_bikram import BSDate, DateOutOfRange
+        import django_bikram_sambat as b
+        from django_bikram_sambat import BSDate, DateOutOfRange
         assert b.MAX_BS_YEAR == b.VERIFIED_MAX_BS_YEAR == 2084
         try:
             BSDate(2100, 1, 1)
@@ -219,14 +219,14 @@ def test_import_is_warning_clean_under_env_activation_and_w_error() -> None:
     """With the env var set AND -W error, import must not emit/raise a warning.
 
     The BSDate.max sentinel is itself a provisional date; building it must be
-    suppressed, or `import django_bikram` crashes under warnings-as-error
+    suppressed, or `import django_bikram_sambat` crashes under warnings-as-error
     (which this project's own pytest config sets).
     """
     import os
 
     result = subprocess.run(
         [sys.executable, "-W", "error", "-c",
-         "import django_bikram; print(django_bikram.MAX_BS_YEAR)"],
+         "import django_bikram_sambat; print(django_bikram_sambat.MAX_BS_YEAR)"],
         capture_output=True, text=True, check=False,
         env={**os.environ, "DJANGO_BIKRAM_PROVISIONAL_THROUGH_YEAR": "2150"},
     )
@@ -239,7 +239,7 @@ def test_env_var_typo_is_rejected_not_hung() -> None:
     import os
 
     result = subprocess.run(
-        [sys.executable, "-c", "import django_bikram"],
+        [sys.executable, "-c", "import django_bikram_sambat"],
         capture_output=True, text=True, check=False, timeout=30,
         env={**os.environ, "DJANGO_BIKRAM_PROVISIONAL_THROUGH_YEAR": "21840"},
     )
@@ -252,9 +252,9 @@ def test_copy_and_pickle_of_provisional_do_not_rewarn() -> None:
     out = _run(
         """
         import warnings, copy, pickle
-        from django_bikram import BSDate
-        from django_bikram.calendar_data import install_provisional
-        from django_bikram.predict import build_provisional_table
+        from django_bikram_sambat import BSDate
+        from django_bikram_sambat.calendar_data import install_provisional
+        from django_bikram_sambat.predict import build_provisional_table
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             install_provisional(build_provisional_table(2120))
@@ -273,9 +273,9 @@ def test_two_digit_year_is_stable_across_provisional_install() -> None:
     """%y is pinned to the verified range, so install doesn't shift it."""
     out = _run(
         """
-        from django_bikram import parse_bs
-        from django_bikram.calendar_data import install_provisional
-        from django_bikram.predict import build_provisional_table
+        from django_bikram_sambat import parse_bs
+        from django_bikram_sambat.calendar_data import install_provisional
+        from django_bikram_sambat.predict import build_provisional_table
         before = parse_bs("85-01-01", "%y-%m-%d")[0]
         install_provisional(build_provisional_table(2100))
         after = parse_bs("85-01-01", "%y-%m-%d")[0]
@@ -293,7 +293,7 @@ def test_provisional_warning_is_attributed_to_the_caller(tmp_path) -> None:
     """Each call site must get its own warning, not one for the whole program.
 
     warnings deduplicates on the *attributed* module and line. A fixed
-    stacklevel pointed every ProvisionalDateWarning at django_bikram/date.py,
+    stacklevel pointed every ProvisionalDateWarning at django_bikram_sambat/date.py,
     so the registry keyed there and the second module in a program to touch
     provisional data got no warning at all -- silently using unverified dates.
 
@@ -302,12 +302,12 @@ def test_provisional_warning_is_attributed_to_the_caller(tmp_path) -> None:
     attribution is what is being measured.
     """
     (tmp_path / "billing.py").write_text(
-        "from django_bikram import BSDate\n"
+        "from django_bikram_sambat import BSDate\n"
         "def charge():\n"
         "    return BSDate(2090, 1, 1)\n"
     )
     (tmp_path / "reporting.py").write_text(
-        "from django_bikram import BSDate\n"
+        "from django_bikram_sambat import BSDate\n"
         "def summarise():\n"
         "    return BSDate(2090, 1, 1)\n"  # same year, different call site
     )

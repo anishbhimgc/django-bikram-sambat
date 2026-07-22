@@ -31,7 +31,7 @@ The honest alternative is a half-open range on the indexed column, which is
 what a BS year *is*: a contiguous span of AD dates. The helpers below build
 those ranges, so the query stays a plain indexed range scan::
 
-    from django_bikram.django.lookups import bs_year_q, bs_month_q
+    from django_bikram_sambat.django.lookups import bs_year_q, bs_month_q
 
     Invoice.objects.filter(bs_year_q("issued_on", 2081))
     Invoice.objects.filter(bs_month_q("issued_on", 2081, 1))
@@ -168,7 +168,7 @@ def bs_fiscal_year_q(field: str, start_year: int) -> Q:
     Nepal's fiscal year runs 1 Shrawan to the last of Ashadh, so it spans two BS
     years -- which is exactly why it needs a helper: no combination of the
     built-in lookups expresses it, and it is a single contiguous range of AD
-    dates. See :mod:`django_bikram.fiscal`.
+    dates. See :mod:`django_bikram_sambat.fiscal`.
 
     Args:
         field: The field name (or lookup path).

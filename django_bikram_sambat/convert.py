@@ -1,8 +1,8 @@
 """Bidirectional conversion between Bikram Sambat and Gregorian dates.
 
 Both directions are day-offset arithmetic from the single anchor defined in
-:mod:`django_bikram.calendar_data`: a BS date is turned into "days since the anchor",
-which the Gregorian side already knows how to handle via
+:mod:`django_bikram_sambat.calendar_data`: a BS date is turned into "days since
+the anchor", which the Gregorian side already knows how to handle via
 :class:`datetime.timedelta`.
 
 Cost
@@ -134,7 +134,7 @@ _TOTAL_DAYS = _YEAR_START_OFFSET[-1] + sum(BS_MONTH_DAYS[MAX_BS_YEAR])
 def _reload_from_calendar_data() -> None:
     """Rebuild cached offsets after the working table gained provisional years.
 
-    Called by :func:`django_bikram.calendar_data.install_provisional`. The
+    Called by :func:`django_bikram_sambat.calendar_data.install_provisional`. The
     ``BS_MONTH_DAYS`` mapping is mutated in place upstream, so this module's
     reference already sees the new years; only the derived caches and the
     ``MAX_*`` echoes used in error messages need refreshing.
@@ -171,8 +171,8 @@ def days_in_month(year: int, month: int) -> int:
     if year not in BS_MONTH_DAYS:
         raise DateOutOfRange(
             f"BS year {year} is outside the verified range "
-            f"{MIN_BS_YEAR}..{MAX_BS_YEAR}. See django_bikram.calendar_data for why "
-            f"this package refuses to extrapolate."
+            f"{MIN_BS_YEAR}..{MAX_BS_YEAR}. See django_bikram_sambat.calendar_data "
+            f"for why this package refuses to extrapolate."
         )
     if not isinstance(month, int) or isinstance(month, bool):
         raise InvalidBSDate(f"month must be an int, got {type(month).__name__!r}")
@@ -225,7 +225,7 @@ def check_bs_date(year: int, month: int, day: int) -> None:
         >>> check_bs_date(2081, 1, 32)  # doctest: +ELLIPSIS
         Traceback (most recent call last):
             ...
-        django_bikram.exceptions.InvalidBSDate: day 32 is out of range for 2081-01, ...
+        django_bikram_sambat.exceptions.InvalidBSDate: day 32 is out of ...
     """
     length = days_in_month(year, month)  # validates year and month
     if not isinstance(day, int) or isinstance(day, bool):

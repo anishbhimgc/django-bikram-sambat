@@ -4,7 +4,8 @@ The whole design rests on one decision, stated here because everything else
 follows from it:
 
 **The column is a native ``date`` holding the Gregorian (AD) value; Python sees
-a** :class:`~django_bikram.date.BSDate` **. Conversion happens only at the boundary.**
+a** :class:`~django_bikram_sambat.date.BSDate` **. Conversion happens only at
+the boundary.**
 
 The alternative -- storing ``"2081-01-01"`` as text, or splitting into
 ``year``/``month``/``day`` integer columns -- looks simpler for about a day and
@@ -33,7 +34,7 @@ The one thing to know is that every database-side date operation works on the
 **stored Gregorian** value, because that is genuinely what the column contains:
 
 * ``__year`` / ``__month`` / ``__day`` filter on the AD components. See
-  :mod:`django_bikram.django.lookups` for the BS-year equivalent and why it is a
+  :mod:`django_bikram_sambat.django.lookups` for the BS-year equivalent and why it is a
   helper rather than a lookup.
 * ``ExtractYear`` and friends return the AD number -- ``2024``, not ``2081``.
 * ``TruncMonth`` / ``TruncYear`` truncate to the start of the **AD** month or
@@ -42,7 +43,7 @@ The one thing to know is that every database-side date operation works on the
   :class:`BSDate` that is *not* a BS month or year start:
   ``TruncMonth`` over 1 Baishakh 2081 yields ``BSDate(2080, 12, 19)``. Group by
   Bikram Sambat periods with the range helpers in
-  :mod:`django_bikram.django.lookups` instead, or bucket in Python.
+  :mod:`django_bikram_sambat.django.lookups` instead, or bucket in Python.
 """
 
 from __future__ import annotations
@@ -76,7 +77,7 @@ class BSDateField(models.DateField):
 
     Assignment accepts several types, each with a fixed meaning:
 
-    * :class:`~django_bikram.date.BSDate` -- used as-is.
+    * :class:`~django_bikram_sambat.date.BSDate` -- used as-is.
     * :class:`datetime.date` -- read as a **Gregorian** date and converted.
       This is what makes ``date(2024, 4, 13)`` and ``BSDate(2081, 1, 1)``
       interchangeable in queries.
@@ -361,14 +362,14 @@ class BSDateField(models.DateField):
         """Return the default form field for this model field.
 
         Any Gregorian admin date widget handed in is swapped for
-        :class:`~django_bikram.django.forms.BSDateInput`; see
+        :class:`~django_bikram_sambat.django.forms.BSDateInput`; see
         :func:`_is_gregorian_admin_widget` for why that matters.
 
         Args:
             **kwargs: Overrides passed to the form field.
 
         Returns:
-            A :class:`~django_bikram.django.forms.BSDateField` form field.
+            A :class:`~django_bikram_sambat.django.forms.BSDateField` form field.
         """
         from .forms import BSDateField as BSDateFormField
         from .forms import BSDateInput
@@ -398,7 +399,7 @@ def _is_gregorian_admin_widget(widget: Any) -> bool:
     -- 1969 AD. A 57-year error produced by the most-clicked button in the admin.
 
     This is the same trap as DRF's ``ModelSerializer`` field mapping (see
-    :func:`django_bikram.django.drf.register_serializer_field`), arriving by the
+    :func:`django_bikram_sambat.django.drf.register_serializer_field`), arriving by the
     same route: subclassing ``DateField`` is what buys the lookups, and it is
     also what makes a third party assume the value is Gregorian. There the caller
     has to opt in, because the fix mutates a third-party class; here the fix is
@@ -443,8 +444,9 @@ def _register_migration_serializer() -> None:
             """Return the source string and its required imports."""
             value: BSDate = self.value
             return (
-                f"django_bikram.BSDate({value.year}, {value.month}, {value.day})",
-                {"import django_bikram"},
+                f"django_bikram_sambat.BSDate("
+                f"{value.year}, {value.month}, {value.day})",
+                {"import django_bikram_sambat"},
             )
 
     MigrationWriter.register_serializer(BSDate, BSDateSerializer)

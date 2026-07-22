@@ -4,9 +4,9 @@ DRF is an optional dependency. Importing this module without it installed
 raises :exc:`ImportError` with an actionable message rather than a bare
 ``ModuleNotFoundError`` from somewhere deep in the import graph::
 
-    pip install django-bikram[drf]
+    pip install django-bikram-sambat[drf]
 
-Nothing else in :mod:`django_bikram` imports this module, so the dependency stays
+Nothing else in :mod:`django_bikram_sambat` imports this module, so the dependency stays
 opt-in.
 """
 
@@ -20,9 +20,9 @@ try:
     from rest_framework import serializers
 except ImportError as exc:  # pragma: no cover - depends on the environment
     raise ImportError(
-        "django_bikram.django.drf requires djangorestframework, which is an optional "
-        "dependency of django-bikram. Install it with: "
-        "pip install django-bikram[drf]"
+        "django_bikram_sambat.django.drf requires djangorestframework, which is an "
+        "optional dependency of django-bikram-sambat. Install it with: "
+        "pip install django-bikram-sambat[drf]"
     ) from exc
 
 from ..date import BSDate
@@ -35,7 +35,7 @@ __all__ = ["BSDateField", "register_serializer_field"]
 
 
 class BSDateField(serializers.Field):
-    """Serialise a :class:`~django_bikram.date.BSDate` to and from a string.
+    """Serialise a :class:`~django_bikram_sambat.date.BSDate` to and from a string.
 
     By default the representation is the Bikram Sambat ``YYYY-MM-DD`` string,
     which sorts, round-trips, and is what a Nepali client expects to display.
@@ -81,7 +81,7 @@ class BSDateField(serializers.Field):
         Args:
             format: strftime-style format for output.
             input_formats: Formats accepted on input; defaults to
-                :data:`django_bikram.django.forms.DEFAULT_INPUT_FORMATS`, plus
+                :data:`django_bikram_sambat.django.forms.DEFAULT_INPUT_FORMATS`, plus
                 ``format`` itself.
             lang: Language for month and weekday names, in both directions.
             numerals: Numeral system for output digits.
@@ -182,7 +182,7 @@ class BSDateField(serializers.Field):
 
 
 def register_serializer_field() -> None:
-    """Map :class:`~django_bikram.django.fields.BSDateField` in ``ModelSerializer``.
+    """Map ``BSDateField`` into ``ModelSerializer``'s field mapping.
 
     ``ModelSerializer`` builds fields by looking the model field's class up in
     ``serializer_field_mapping``. Because our model field subclasses
@@ -195,7 +195,7 @@ def register_serializer_field() -> None:
 
         class MyAppConfig(AppConfig):
             def ready(self):
-                from django_bikram.django.drf import register_serializer_field
+                from django_bikram_sambat.django.drf import register_serializer_field
                 register_serializer_field()
 
     It is not called on import: mutating a third-party class as a side effect

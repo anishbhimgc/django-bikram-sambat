@@ -206,7 +206,7 @@ def format_bs(
         InvalidBSDate: If ``lang`` or ``numerals`` is unsupported.
 
     Example:
-        >>> from django_bikram import BSDate
+        >>> from django_bikram_sambat import BSDate
         >>> format_bs(BSDate(2081, 1, 1), "%d %B %Y")
         '01 Baishakh 2081'
         >>> format_bs(BSDate(2081, 1, 1), "%d %B %Y", lang="ne",
@@ -344,7 +344,7 @@ def parse_bs(
 
     Returns:
         A ``(year, month, day)`` tuple. The components are validated as a real
-        date by :class:`~django_bikram.date.BSDate`, not here.
+        date by :class:`~django_bikram_sambat.date.BSDate`, not here.
 
     Raises:
         InvalidBSDate: If the string does not match the format, if a required

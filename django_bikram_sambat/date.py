@@ -193,7 +193,7 @@ class BSDate:
         Raises:
             DateOutOfRange: If the current date is outside the verified range.
                 This is a real possibility once the table lapses; see
-                :mod:`django_bikram.calendar_data`.
+                :mod:`django_bikram_sambat.calendar_data`.
         """
         return cls.from_ad(datetime.datetime.now(tz or NEPAL_TZ).date())
 
@@ -246,7 +246,8 @@ class BSDate:
 
         Args:
             value: The string to parse.
-            fmt: A format string; see :mod:`django_bikram.formatting` for directives.
+            fmt: A format string; see :mod:`django_bikram_sambat.formatting`
+                for directives.
             lang: Language for month and weekday names, ``"en"`` or ``"ne"``.
             numerals: Numeral system of the digits. ``"auto"`` accepts either
                 ASCII or Devanagari.
@@ -379,7 +380,7 @@ class BSDate:
         provisional (computed) range, whose month lengths may differ from the
         eventual official calendar by a day. Constructing or converting a
         provisional date also raises
-        :class:`~django_bikram.exceptions.ProvisionalDateWarning`; this property
+        :class:`~django_bikram_sambat.exceptions.ProvisionalDateWarning`; this property
         is the quiet way to make the same check.
         """
         return is_verified_year(self._year)
@@ -392,7 +393,7 @@ class BSDate:
 
         Nepal's fiscal year runs 1 Shrawan to the last of Ashadh, so a date in
         Baishakh belongs to the fiscal year that opened the *previous* BS year.
-        See :mod:`django_bikram.fiscal`.
+        See :mod:`django_bikram_sambat.fiscal`.
 
         Example:
             >>> BSDate(2081, 4, 1).fiscal_year    # 1 Shrawan opens FY 2081/82
@@ -456,7 +457,8 @@ class BSDate:
         """Format this date using a strftime-style format string.
 
         Args:
-            fmt: A format string; see :mod:`django_bikram.formatting` for directives.
+            fmt: A format string; see :mod:`django_bikram_sambat.formatting`
+                for directives.
             lang: Language for month and weekday names, ``"en"`` or ``"ne"``.
             numerals: Numeral system for digits, ``"ascii"`` or
                 ``"devanagari"``.
@@ -627,7 +629,7 @@ with warnings.catch_warnings():
 def _reload_from_calendar_data() -> None:
     """Refresh :attr:`BSDate.max` after provisional years extended the table.
 
-    Called by :func:`django_bikram.calendar_data.install_provisional`. The new
+    Called by :func:`django_bikram_sambat.calendar_data.install_provisional`. The new
     maximum is itself a provisional date, so the (expected) warning from
     constructing it is suppressed here -- installing the table is not the same
     as a caller reaching into the provisional range.

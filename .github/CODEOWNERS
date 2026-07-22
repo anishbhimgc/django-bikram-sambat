@@ -2,4 +2,4 @@
 # The calendar data is the correctness core -- called out so it always gets
 # extra scrutiny even if that ever changes.
 *                                   @anishbhimgc
-/django_bikram/calendar_data.py     @anishbhimgc
+/django_bikram_sambat/calendar_data.py     @anishbhimgc

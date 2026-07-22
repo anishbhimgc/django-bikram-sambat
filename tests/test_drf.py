@@ -10,7 +10,7 @@ import datetime
 
 import pytest
 
-from django_bikram import BSDate
+from django_bikram_sambat import BSDate
 
 from .models import Invoice
 
@@ -18,7 +18,7 @@ rest_framework = pytest.importorskip("rest_framework", reason="DRF is an optiona
 
 from rest_framework import serializers  # noqa: E402
 
-from django_bikram.django.drf import BSDateField, register_serializer_field  # noqa: E402
+from django_bikram_sambat.django.drf import BSDateField, register_serializer_field  # noqa: E402
 
 
 class InvoiceSerializer(serializers.ModelSerializer):
@@ -138,7 +138,7 @@ def test_modelserializer_without_registration_uses_drf_datefield() -> None:
             fields = ["issued_on"]
 
     mapping = serializers.ModelSerializer.serializer_field_mapping
-    from django_bikram.django.fields import BSDateField as BSDateModelField
+    from django_bikram_sambat.django.fields import BSDateField as BSDateModelField
 
     assert mapping.get(BSDateModelField) is None
     assert isinstance(AutoSerializer().fields["issued_on"], serializers.DateField)
@@ -146,7 +146,7 @@ def test_modelserializer_without_registration_uses_drf_datefield() -> None:
 
 def test_register_serializer_field_fixes_modelserializer() -> None:
     """After registration, ModelSerializer builds the BS field automatically."""
-    from django_bikram.django.fields import BSDateField as BSDateModelField
+    from django_bikram_sambat.django.fields import BSDateField as BSDateModelField
 
     mapping = serializers.ModelSerializer.serializer_field_mapping
     original = mapping.copy()

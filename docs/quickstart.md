@@ -1,6 +1,6 @@
 # Quickstart
 
-A practical, step-by-step guide to using `django-bikram`. For the full reference,
+A practical, step-by-step guide to using `django-bikram-sambat`. For the full reference,
 see the [README](../README.md). नेपालीमा: [quickstart.ne.md](quickstart.ne.md).
 
 > This library ships **only verified dates: 1975–2084 BS** (up to 12 April 2028).
@@ -12,12 +12,12 @@ see the [README](../README.md). नेपालीमा: [quickstart.ne.md](qui
 ## Step 1 — Install
 
 ```bash
-pip install django-bikram          # core + Django
-pip install django-bikram[drf]     # also Django REST Framework
+pip install django-bikram-sambat          # core + Django
+pip install django-bikram-sambat[drf]     # also Django REST Framework
 ```
 
 Python 3.10+ is required. The core `BSDate` type has **no dependencies** — Django
-is only needed for `django_bikram.django`.
+is only needed for `django_bikram_sambat.django`.
 
 ---
 
@@ -27,7 +27,7 @@ is only needed for `django_bikram.django`.
 new to learn.
 
 ```python
-from django_bikram import BSDate
+from django_bikram_sambat import BSDate
 import datetime
 
 d = BSDate(2081, 1, 1)
@@ -70,7 +70,7 @@ Directives: `%Y %y %m %-m %d %-d %B %b %A %a %j %%`.
 ## Step 4 — Parsing user input
 
 ```python
-from django_bikram import parse_bs, BSDate
+from django_bikram_sambat import parse_bs, BSDate
 
 # ASCII or Devanagari digits both work (numerals="auto" by default)
 parse_bs("२०८१-०१-०१", "%Y-%m-%d")            # (2081, 1, 1)
@@ -87,7 +87,7 @@ BSDate.fromisoformat("2081-01-01")            # BSDate(2081, 1, 1)
 
 ```python
 from django.db import models
-from django_bikram.django import BSDateField
+from django_bikram_sambat.django import BSDateField
 
 class Invoice(models.Model):
     issued_on  = BSDateField(db_index=True)
@@ -118,7 +118,7 @@ There is **no `__bs_year` lookup** (the README explains why). Use the helpers
 instead — they build index-friendly half-open ranges:
 
 ```python
-from django_bikram.django.lookups import bs_year_q, bs_month_q
+from django_bikram_sambat.django.lookups import bs_year_q, bs_month_q
 
 Invoice.objects.filter(bs_year_q("issued_on", 2081))          # all of 2081 BS
 Invoice.objects.filter(bs_month_q("issued_on", 2081, 1))      # Baishakh 2081
@@ -136,7 +136,7 @@ Invoice.objects.exclude(bs_year_q("issued_on", 2081))
 
 ```python
 from rest_framework import serializers
-from django_bikram.django.drf import BSDateField
+from django_bikram_sambat.django.drf import BSDateField
 
 class InvoiceSerializer(serializers.ModelSerializer):
     issued_on = BSDateField()          # declare it explicitly
@@ -155,7 +155,7 @@ from django.apps import AppConfig
 class MyAppConfig(AppConfig):
     name = "myapp"
     def ready(self):
-        from django_bikram.django.drf import register_serializer_field
+        from django_bikram_sambat.django.drf import register_serializer_field
         register_serializer_field()
 ```
 
@@ -187,7 +187,7 @@ error matters** — see the README's ["Living past 2084"](../README.md#living-pa
 ## Handling errors
 
 ```python
-from django_bikram import BikramError, InvalidBSDate, DateOutOfRange
+from django_bikram_sambat import BikramError, InvalidBSDate, DateOutOfRange
 
 try:
     d = BSDate(year, month, day)

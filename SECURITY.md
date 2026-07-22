@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-The latest release on PyPI receives security fixes. `django-bikram` is a pure
+The latest release on PyPI receives security fixes. `django-bikram-sambat` is a pure
 date library: the core has no dependencies and performs no network or filesystem
 access at runtime, so its attack surface is small.
 

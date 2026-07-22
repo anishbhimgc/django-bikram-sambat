@@ -12,7 +12,7 @@ import datetime
 
 import pytest
 
-from django_bikram.calendar_data import (
+from django_bikram_sambat.calendar_data import (
     ANCHOR_AD,
     ANCHOR_BS_YEAR,
     BS_MONTH_DAYS,
@@ -21,7 +21,7 @@ from django_bikram.calendar_data import (
     MIN_AD_DATE,
     MIN_BS_YEAR,
 )
-from django_bikram.convert import bs_to_ad
+from django_bikram_sambat.convert import bs_to_ad
 
 ALL_YEARS = sorted(BS_MONTH_DAYS)
 

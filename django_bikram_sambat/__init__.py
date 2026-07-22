@@ -2,14 +2,14 @@
 
 The public surface is small on purpose::
 
-    >>> from django_bikram import BSDate
+    >>> from django_bikram_sambat import BSDate
     >>> BSDate(2081, 1, 1).to_ad()
     datetime.date(2024, 4, 13)
     >>> BSDate.from_ad(datetime.date(2024, 4, 13))
     BSDate(2081, 1, 1)
 
-Django integration lives in :mod:`django_bikram.django` and is imported separately so
-that this package stays usable without Django installed.
+Django integration lives in :mod:`django_bikram_sambat.django` and is imported
+separately so that this package stays usable without Django installed.
 """
 
 from __future__ import annotations
@@ -42,7 +42,7 @@ from .fiscal import (
 )
 from .formatting import format_bs, parse_bs, to_ascii_digits, to_devanagari
 
-__version__ = "0.3.1"
+__version__ = "0.4.0"
 
 __all__ = [
     "BSDate",

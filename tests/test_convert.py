@@ -10,15 +10,15 @@ import datetime
 
 import pytest
 
-from django_bikram.calendar_data import (
+from django_bikram_sambat.calendar_data import (
     BS_MONTH_DAYS,
     MAX_AD_DATE,
     MAX_BS_YEAR,
     MIN_AD_DATE,
     MIN_BS_YEAR,
 )
-from django_bikram.convert import ad_to_bs, bs_to_ad, check_bs_date, days_in_month, days_in_year
-from django_bikram.exceptions import DateOutOfRange, InvalidBSDate
+from django_bikram_sambat.convert import ad_to_bs, bs_to_ad, check_bs_date, days_in_month, days_in_year
+from django_bikram_sambat.exceptions import DateOutOfRange, InvalidBSDate
 
 
 def _all_bs_dates() -> list[tuple[int, int, int]]:

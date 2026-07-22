@@ -1,6 +1,6 @@
 """Optional external data sources for the provisional calendar range.
 
-An **alternative** to the astronomical predictor in :mod:`django_bikram.predict`
+An **alternative** to the astronomical predictor in :mod:`django_bikram_sambat.predict`
 for years past the verified range.
 
 `bikram-sambat <https://pypi.org/project/bikram-sambat/>`_ (MIT) is a separately
@@ -10,11 +10,11 @@ project's own computed values** -- a single, unverified source. It is no more
 authoritative than the built-in predictor: the two disagree on every year past
 2083, and neither is the official Panchanga. This adapter exists only so you can
 *choose* which best-guess to install; both produce tables you feed to
-:func:`django_bikram.calendar_data.install_provisional`.
+:func:`django_bikram_sambat.calendar_data.install_provisional`.
 
 Requires the optional dependency::
 
-    pip install "django-bikram[bikram-sambat]"
+    pip install "django-bikram-sambat[bikram-sambat]"
 
 Nothing here is imported by default, so the dependency stays opt-in.
 """
@@ -32,15 +32,15 @@ def bikram_sambat_table(
     """Return `bikram-sambat`'s month lengths for years past the verified range.
 
     The result is shaped like
-    :data:`~django_bikram.calendar_data.VERIFIED_BS_MONTH_DAYS` and covers
+    :data:`~django_bikram_sambat.calendar_data.VERIFIED_BS_MONTH_DAYS` and covers
     ``VERIFIED_MAX_BS_YEAR + 1`` through ``through_year``, ready to hand to
-    :func:`~django_bikram.calendar_data.install_provisional`.
+    :func:`~django_bikram_sambat.calendar_data.install_provisional`.
 
     **This is unverified, single-source data** (see the module docstring). Treat
     it exactly like a prediction: fine for planning and display, never for a date
     where a one-day error matters. Installed years are flagged the same way the
     predictor's are -- ``is_verified`` is ``False`` and use raises
-    :class:`~django_bikram.exceptions.ProvisionalDateWarning`.
+    :class:`~django_bikram_sambat.exceptions.ProvisionalDateWarning`.
 
     Args:
         through_year: The last BS year to include. Defaults to a century past
@@ -56,7 +56,7 @@ def bikram_sambat_table(
             ``bikram-sambat`` lacks a requested year or returns a malformed one.
 
     Example:
-        >>> from django_bikram.calendar_data import install_provisional
+        >>> from django_bikram_sambat.calendar_data import install_provisional
         >>> install_provisional(bikram_sambat_table(2150))  # doctest: +SKIP
     """
     first = VERIFIED_MAX_BS_YEAR + 1
@@ -70,7 +70,7 @@ def bikram_sambat_table(
     except ImportError as exc:  # pragma: no cover - depends on the environment
         raise ImportError(
             "bikram_sambat_table() needs the optional 'bikram-sambat' package. "
-            'Install it with: pip install "django-bikram[bikram-sambat]"'
+            'Install it with: pip install "django-bikram-sambat[bikram-sambat]"'
         ) from exc
 
     table: dict[int, tuple[int, ...]] = {}

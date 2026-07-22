@@ -13,8 +13,8 @@ from django.db.models.functions import ExtractYear, TruncMonth, TruncYear
 from django.test import override_settings
 from django.utils import timezone
 
-from django_bikram import BSDate
-from django_bikram.django import BSDateField
+from django_bikram_sambat import BSDate
+from django_bikram_sambat.django import BSDateField
 
 from .models import Invoice
 
@@ -234,7 +234,7 @@ def test_db_side_date_function_sees_gregorian() -> None:
 
     Documented behaviour, not a bug: ExtractYear on 1 Baishakh 2081 yields
     2024, because that is what the column contains. Use
-    django_bikram.django.lookups.bs_year_q for BS-year filtering.
+    django_bikram_sambat.django.lookups.bs_year_q for BS-year filtering.
     """
     Invoice.objects.create(issued_on=BSDate(2081, 1, 1))
     row = Invoice.objects.annotate(ad_year=ExtractYear("issued_on")).get()
@@ -248,7 +248,7 @@ def test_trunc_buckets_by_the_gregorian_period() -> None:
     it came from: ExtractYear returns a bare 2024, but Trunc* returns a BSDate
     that looks like a BS period start and is not one. Pinned here because the
     README documents these exact values -- group by BS periods with the range
-    helpers in django_bikram.django.lookups instead.
+    helpers in django_bikram_sambat.django.lookups instead.
     """
     Invoice.objects.create(issued_on=BSDate(2081, 1, 1))  # 2024-04-13
     row = Invoice.objects.annotate(
@@ -362,7 +362,7 @@ def test_value_from_object_leaves_strings_alone() -> None:
 def test_field_deconstructs_for_migrations() -> None:
     """The field deconstructs to an importable path with its kwargs."""
     name, path, args, kwargs = BSDateField(null=True).deconstruct()
-    assert path == "django_bikram.django.fields.BSDateField"
+    assert path == "django_bikram_sambat.django.fields.BSDateField"
     assert kwargs["null"] is True
 
 
@@ -374,9 +374,9 @@ def test_bsdate_default_serialises_in_a_migration() -> None:
     from django.db.migrations.writer import MigrationWriter
 
     string, imports = MigrationWriter.serialize(BSDate(2081, 1, 1))
-    assert string == "django_bikram.BSDate(2081, 1, 1)"
-    assert "import django_bikram" in imports
-    assert eval(string, {"django_bikram": __import__("django_bikram")}) == BSDate(2081, 1, 1)
+    assert string == "django_bikram_sambat.BSDate(2081, 1, 1)"
+    assert "import django_bikram_sambat" in imports
+    assert eval(string, {"django_bikram_sambat": __import__("django_bikram_sambat")}) == BSDate(2081, 1, 1)
 
 
 def test_admin_gregorian_date_widget_is_replaced() -> None:
@@ -390,7 +390,7 @@ def test_admin_gregorian_date_widget_is_replaced() -> None:
     """
     from django.contrib.admin.widgets import AdminDateWidget
 
-    from django_bikram.django.forms import BSDateInput
+    from django_bikram_sambat.django.forms import BSDateInput
 
     # Instance and class both, since Django passes either.
     for widget in (AdminDateWidget(), AdminDateWidget):
@@ -409,6 +409,6 @@ def test_admin_gregorian_date_widget_is_replaced() -> None:
 
 def test_formfield_is_the_bs_form_field() -> None:
     """The model field hands back a BS-aware form field."""
-    from django_bikram.django.forms import BSDateField as BSDateFormField
+    from django_bikram_sambat.django.forms import BSDateField as BSDateFormField
 
     assert isinstance(BSDateField().formfield(), BSDateFormField)

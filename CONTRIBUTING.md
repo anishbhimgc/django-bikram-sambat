@@ -1,4 +1,4 @@
-# Contributing to django-bikram
+# Contributing to django-bikram-sambat
 
 Thanks for helping. The bar here is high on purpose: this is a calendar library,
 and a wrong month length is a silent, hard-to-notice bug.
@@ -6,8 +6,8 @@ and a wrong month length is a silent, hard-to-notice bug.
 ## Development setup
 
 ```bash
-git clone https://github.com/anishbhimgc/django-bikram
-cd django-bikram
+git clone https://github.com/anishbhimgc/django-bikram-sambat
+cd django-bikram-sambat
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 ```
@@ -16,8 +16,8 @@ pip install -e ".[dev]"
 
 ```bash
 pytest                    # the full suite
-ruff check django_bikram/ # style + lint
-mypy django_bikram/       # strict typing
+ruff check django_bikram_sambat/ # style + lint
+mypy django_bikram_sambat/       # strict typing
 ```
 
 CI additionally runs the test suite across Python 3.10–3.13 and Django 4.2 / 5.1
@@ -25,14 +25,14 @@ CI additionally runs the test suite across Python 3.10–3.13 and Django 4.2 / 5
 
 ## Touching the calendar data
 
-`django_bikram/calendar_data.py` is the correctness core.
+`django_bikram_sambat/calendar_data.py` is the correctness core.
 
 - **Verified years** (`VERIFIED_BS_MONTH_DAYS`) may only be added when a year is
   corroborated by **at least two independent published sources**, and must pass
   the invariants in `tests/test_calendar_data.py` (twelve months, 365/366 days,
   no filler tail).
 - **Do not** promote predicted (provisional) data into the verified table. The
-  predictor in `django_bikram/predict.py` is ~87% accurate per month (see its
+  predictor in `django_bikram_sambat/predict.py` is ~87% accurate per month (see its
   `validate()`); that is a planning aid, never a source of verified dates.
 
 ## Releasing (maintainers)
@@ -43,7 +43,7 @@ One-time PyPI setup:
 
 1. On https://pypi.org, register a *pending publisher* under the project
    (or the account): PyPI → *Your projects* → *Publishing* → add a GitHub
-   publisher with owner `anishbhimgc`, repo `django-bikram`, workflow
+   publisher with owner `anishbhimgc`, repo `django-bikram-sambat`, workflow
    `publish.yml`, environment `pypi`.
 
 Each release:

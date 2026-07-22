@@ -1,4 +1,4 @@
-# Migrating to django-bikram
+# Migrating to django-bikram-sambat
 
 This guide covers moving from the three Bikram Sambat field packages already on
 PyPI. Each section states what changes on disk, what changes in your code, and
@@ -11,14 +11,14 @@ coming from.
 
 ## Before you start
 
-**Check the verified range covers your data.** django-bikram refuses dates
+**Check the verified range covers your data.** django-bikram-sambat refuses dates
 outside **1975–2084 BS** rather than extrapolating them, and the migrations below
 will raise `DateOutOfRange` on a row it cannot represent. That is deliberate —
 such a row was already wrong — but you want to find out before the migration, not
 during it:
 
 ```python
-from django_bikram import MIN_AD_DATE, VERIFIED_MAX_AD_DATE
+from django_bikram_sambat import MIN_AD_DATE, VERIFIED_MAX_AD_DATE
 
 Invoice.objects.exclude(
     issued_on__range=(MIN_AD_DATE, VERIFIED_MAX_AD_DATE)
@@ -47,7 +47,7 @@ and no data migration is needed.** Only the Python type changes: you get a
 
 ```diff
 -from nepali_datetime_field.models import NepaliDateField
-+from django_bikram.django import BSDateField
++from django_bikram_sambat.django import BSDateField
 
  class Invoice(models.Model):
 -    issued_on = NepaliDateField()
@@ -60,7 +60,7 @@ instantly even on a large table.
 
 ### 2. Update the value type at the edges
 
-| `nepali_datetime.date` | `django_bikram.BSDate` |
+| `nepali_datetime.date` | `django_bikram_sambat.BSDate` |
 |---|---|
 | `nepali_datetime.date(2081, 1, 1)` | `BSDate(2081, 1, 1)` |
 | `d.to_datetime_date()` | `d.to_ad()` |
@@ -110,7 +110,7 @@ python manage.py makemigrations && python manage.py migrate
 ```python
 # invoices/migrations/00XX_backfill_issued_on.py
 from django.db import migrations
-from django_bikram import BSDate
+from django_bikram_sambat import BSDate
 
 
 def forwards(apps, schema_editor):
@@ -167,14 +167,14 @@ Invoice.objects.filter(issued_on__gte=BSDate(2081, 1, 1))
 ```
 
 `.fiscal_year` and `.fiscal_quarter` have direct equivalents — see
-[`django_bikram.fiscal`](../django_bikram/fiscal.py):
+[`django_bikram_sambat.fiscal`](../django_bikram_sambat/fiscal.py):
 
 ```python
 d.fiscal_year          # 2081
 d.fiscal_year_label    # '2081/82'
 d.fiscal_quarter       # 1
 
-from django_bikram.django.lookups import bs_fiscal_year_q
+from django_bikram_sambat.django.lookups import bs_fiscal_year_q
 Invoice.objects.filter(bs_fiscal_year_q("issued_on", 2081))   # uses the index
 ```
 
@@ -187,7 +187,7 @@ failed. This one raises.
 `npdatetime` C-extension dependency:
 
 ```python
-from django_bikram.django import BSDatePickerInput
+from django_bikram_sambat.django import BSDatePickerInput
 
 widgets = {"issued_on": BSDatePickerInput(lang="ne", numerals="devanagari")}
 ```
@@ -215,7 +215,7 @@ If you rolled your own storage, the shape of the work is the same as the
 Run this after any of the paths above:
 
 ```python
-from django_bikram import BSDate
+from django_bikram_sambat import BSDate
 
 # 1. Every row round-trips.
 for row in Invoice.objects.iterator(chunk_size=2000):
@@ -238,6 +238,6 @@ ordering and date ordering agree on ISO-shaped data right up until they don't.
 ## Getting help
 
 Open an issue at
-<https://github.com/anishbhimgc/django-bikram/issues> with the package you are
+<https://github.com/anishbhimgc/django-bikram-sambat/issues> with the package you are
 migrating from and the error. Migration problems are a documentation bug as much
 as a code one.

@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-07-23
+
+### Changed
+
+- **Renamed from `django-bikram` to `django-bikram-sambat`**, and the import
+  from `django_bikram` to `django_bikram_sambat`. "Bikram" alone is a common
+  Nepali given name, so the old name was ambiguous in search and said nothing
+  about what the package does; the new one spells out the calendar.
+
+  Migrating is a find-and-replace:
+
+  ```bash
+  pip uninstall django-bikram && pip install django-bikram-sambat
+  ```
+  ```python
+  from django_bikram_sambat import BSDate          # was: django_bikram
+  ```
+
+  **Nothing else changed** — same API, same calendar data, same behaviour, same
+  652 tests. `django-bikram` gets one final release that depends on this package
+  and re-exports it, so existing installs keep working, but it will receive no
+  further updates.
+
+  If you have migrations referencing `django_bikram.BSDate(...)` as a field
+  default, the migration serializer now emits `django_bikram_sambat.BSDate(...)`.
+  Existing migration files keep working while the old package is installed;
+  re-run `makemigrations` to update them, or edit the import by hand.
+
 ## [0.3.1] - 2026-07-23
 
 ### Fixed
@@ -79,14 +107,14 @@ field overwrote a language set on its widget.
 
 ### Added
 
-- **`django_bikram.fiscal`** — Nepali fiscal year (1 Shrawan to the last of
+- **`django_bikram_sambat.fiscal`** — Nepali fiscal year (1 Shrawan to the last of
   Ashadh) and quarter arithmetic. `fiscal_year()`, `fiscal_year_label()`
   (`'2081/82'`), `fiscal_quarter()`, and half-open `fiscal_year_bounds()` /
   `fiscal_quarter_bounds()`, plus `BSDate.fiscal_year`,
   `.fiscal_year_label` and `.fiscal_quarter`. Derived entirely from the one
   start-month rule, so there is no second calendar table to keep in step.
 - **`bs_fiscal_year_q()` / `bs_fiscal_quarter_q()`** in
-  `django_bikram.django.lookups` — index-friendly `Q` helpers, matching the
+  `django_bikram_sambat.django.lookups` — index-friendly `Q` helpers, matching the
   existing `bs_year_q` / `bs_month_q`. A fiscal year spans two BS years, so no
   combination of built-in lookups expresses it.
 - **`BSDatePickerInput`** — a bundled Bikram Sambat calendar widget: 13 kB of
@@ -97,7 +125,7 @@ field overwrote a language set on its widget.
   the Python table. Verified against Python for all 40,178 dates in the range,
   both directions. Progressive enhancement — the field is still a text input,
   and every value is re-validated server-side.
-- **`BSDateFieldListFilter`** in `django_bikram.django.admin` — an admin
+- **`BSDateFieldListFilter`** in `django_bikram_sambat.django.admin` — an admin
   `list_filter` whose periods are Bikram Sambat, and which actually works.
   Django resolves `BSDateField` through `isinstance(f, models.DateField)` to its
   own Gregorian filter, which is broken on this field in two ways. Its labels
@@ -113,7 +141,7 @@ field overwrote a language set on its widget.
   table rather than approximating it. Opt in per field, or globally with
   `register_list_filter()`. `date_hierarchy` remains Gregorian and is now
   documented as such — it is built by a template tag with no registry to hook.
-- `django_bikram.apps.DjangoBikramConfig` — add `"django_bikram"` to
+- `django_bikram_sambat.apps.DjangoBikramConfig` — add `"django_bikram_sambat"` to
   `INSTALLED_APPS` to make the picker's static assets discoverable by
   `collectstatic`. Needed for the picker only; nothing else in the package
   requires app registration, and registering it has no other effect.
@@ -157,7 +185,7 @@ field overwrote a language set on its widget.
   accepted.
 - **`ProvisionalDateWarning` is attributed to the caller, so it is no longer
   silenced after the first use.** A fixed `stacklevel` pointed every such warning
-  at `django_bikram/date.py`; because `warnings` deduplicates on the *attributed*
+  at `django_bikram_sambat/date.py`; because `warnings` deduplicates on the *attributed*
   module and line, the second module in a program to touch provisional data got
   no warning at all and silently used unverified dates. The stacklevel is now
   computed by walking out to the first frame outside the package, which is
@@ -199,10 +227,10 @@ field overwrote a language set on its widget.
   `bikram-sambat` is the lone outlier and chains one day short). This pushes the
   `DateOutOfRange` horizon — and `BSDate.today()`'s expiry — out by a full year.
 
-- `django_bikram.sources.bikram_sambat_table()` — reads the MIT-licensed
+- `django_bikram_sambat.sources.bikram_sambat_table()` — reads the MIT-licensed
   `bikram-sambat` table as an *alternative* provisional source past the verified
   range, for callers who prefer it to the built-in predictor. Opt-in extra:
-  `pip install django-bikram[bikram-sambat]`. Still single-source and unverified.
+  `pip install django-bikram-sambat[bikram-sambat]`. Still single-source and unverified.
 - Django 6.0 support: tested in CI and added to the classifiers.
 
 ### Fixed
@@ -212,7 +240,7 @@ field overwrote a language set on its widget.
   routing them into `to_python`.
 - **`auto_now` / `auto_now_add` under `USE_TZ=False`** no longer crash;
   `pre_save` falls back to the plain local date where `localdate()` would raise.
-- **`import django_bikram` under `-W error`** with the provisional env var set no
+- **`import django_bikram_sambat` under `-W error`** with the provisional env var set no
   longer crashes (the `BSDate.max` sentinel no longer emits a warning at import),
   and copying/pickling a provisional `BSDate` no longer re-emits it.
 - `%y` two-digit-year parsing is pinned to the *verified* range, so installing
@@ -239,7 +267,7 @@ Initial release.
 - `BSDate`: an immutable, hashable, totally ordered Bikram Sambat date with a
   `datetime.date`-shaped API — `weekday()`, `isoformat()`, `replace()`,
   `timedelta` arithmetic, and `BSDate - BSDate -> timedelta`.
-- AD ↔ BS conversion (`django_bikram.convert`) via day-offset arithmetic from a
+- AD ↔ BS conversion (`django_bikram_sambat.convert`) via day-offset arithmetic from a
   single anchor. `O(log years)` per conversion; never walks day by day.
 - Verified calendar data for **1975–2083 BS** (1918-04-13 – 2027-04-13 AD),
   cross-checked between two independent MIT-licensed sources. Dates outside the
@@ -247,23 +275,23 @@ Initial release.
 - Two-tier calendar data: `VERIFIED_BS_MONTH_DAYS` (two-source attested) versus
   an opt-in `PROVISIONAL_BS_MONTH_DAYS` (computed). `is_verified_year()` and
   `BSDate.is_verified` report which tier a date belongs to.
-- `django_bikram.predict`: a Surya-Siddhanta month-length predictor for years
+- `django_bikram_sambat.predict`: a Surya-Siddhanta month-length predictor for years
   past the verified range. `validate()` backtests it against the 109 verified
   years (~87% of months exact, remainder ±1 day, 58/109 years fully correct);
   `build_provisional_table()` returns the predicted table. Enable predicted
   years with the `DJANGO_BIKRAM_PROVISIONAL_THROUGH_YEAR` environment variable
   or `install_provisional()`; using one raises `ProvisionalDateWarning`.
   Predictions are never presented as verified.
-- `django_bikram.formatting`: strftime-style formatting and parsing with
+- `django_bikram_sambat.formatting`: strftime-style formatting and parsing with
   independent language (English/Nepali) and numeral (ASCII/Devanagari) switches.
   Directives: `%Y %y %m %-m %d %-d %B %b %A %a %j %%`.
-- `django_bikram.django.fields.BSDateField`: a `models.DateField` subclass that
+- `django_bikram_sambat.django.fields.BSDateField`: a `models.DateField` subclass that
   stores a native Gregorian `date` and exposes a `BSDate`, preserving indexes,
   range queries, ordering, aggregation and DB-side date functions.
-- `django_bikram.django.forms`: `BSDateField` form field and `BSDateInput` widget.
-- `django_bikram.django.drf`: DRF serializer field, import-guarded as an optional
+- `django_bikram_sambat.django.forms`: `BSDateField` form field and `BSDateInput` widget.
+- `django_bikram_sambat.django.drf`: DRF serializer field, import-guarded as an optional
   extra, plus `register_serializer_field()` for `ModelSerializer`.
-- `django_bikram.django.lookups`: `bs_year_q` / `bs_month_q` / `bs_year_bounds` /
+- `django_bikram_sambat.django.lookups`: `bs_year_q` / `bs_month_q` / `bs_year_bounds` /
   `bs_month_bounds` — index-friendly half-open range helpers.
 - Migration serializer for `BSDate`, so `default=BSDate(...)` works.
 - `py.typed`: the package ships inline type information and passes `mypy --strict`.
