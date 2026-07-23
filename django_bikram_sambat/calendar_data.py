@@ -24,12 +24,37 @@ For 1975-2083 (109 years) the two sources above agree on all 1,308 month
 lengths, every year totals 365 or 366 days, every month is 29-32 days, and the
 derived anchors reproduce independently attested dates (see ``ANCHOR_AD``).
 
-**2084** was added later (2026-07) from a different independent pair: scraped
-from hamropatro.com and found identical to ``nepali-datetime`` for all twelve
-months. Those two disagree with ``bikram-sambat`` on 2084, so Hamro Patro breaks
-the tie; 2084 chains exactly onto 2083 (1 Baishakh 2084 = 2027-04-14). It is the
-first year with a ``(30, 30, 30)`` tail -- corroborated by both sources, but
-worth re-confirming against the official Panchanga once it publishes.
+Two kinds of "verified"
+-----------------------
+The label covers two different standards of evidence, and the difference is
+worth stating rather than smoothing over:
+
+* **1975-2083** -- corroborated by two independent sources that both derive from
+  a Panchanga the Samiti has **already published**. Attested.
+* **2084** -- corroborated by two independent sources that are both
+  **projecting**. The Nepal Panchanga Nirnayak Samiti (the government body that
+  determines the calendar, under the Ministry of Culture, Tourism and Civil
+  Aviation) has published through **2083 only**. It approves each year's patro a
+  few months before that year begins -- 2081's approval came in Magh 2080 -- so
+  2084's official determination is expected around **Magh 2083 (January-February
+  2027)**.
+
+2084 was added (2026-07) from a different independent pair: scraped from
+hamropatro.com and found identical to ``nepali-datetime`` for all twelve months.
+Those two disagree with ``bikram-sambat`` on 2084, so Hamro Patro breaks the tie;
+2084 chains exactly onto 2083 (1 Baishakh 2084 = 2027-04-14). It is the first
+year with a ``(30, 30, 30)`` tail -- corroborated by both sources, but not by the
+official almanac, because that almanac does not exist yet.
+
+It meets this package's stated bar (two independent sources) and is shipped on
+that basis. **Re-confirm it against the official Panchanga once the Samiti
+publishes**, expected early 2027. Note that Hamro Patro, though the most widely
+used calendar in Nepal, is a private company and follows the Samiti's
+determination rather than making it -- popularity is not authority.
+
+For the same reason **2085 onward cannot be promoted today at all**: the Samiti
+has not determined those years, so every available source is necessarily
+projecting, and agreement between projections is not attestation.
 
 Why the range stops at 2084 BS
 ------------------------------
@@ -241,12 +266,21 @@ VERIFIED_BS_MONTH_DAYS: dict[int, tuple[int, ...]] = {
     2081: (31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31),  # 366
     2082: (31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30),  # 365
     2083: (31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30),  # 365
+    # --- the last officially published year ends here -------------------------
+    # Everything above is corroborated by sources deriving from a Panchanga the
+    # Samiti has already published. 2084 below is not: see "Two kinds of
+    # 'verified'" in the module docstring.
+    #
     # 2084 added 2026-07: scraped from hamropatro.com and found identical to
     # nepali-datetime for all 12 months. Those two are independent sources, and
     # they disagree with bikram-sambat here (366 days) -- so Hamro Patro breaks
     # the tie. It chains exactly onto 2083 (1 Baishakh 2084 = 2027-04-14). This
     # is the first year with a (30, 30, 30) tail; unusual, but corroborated by
-    # both sources. Re-confirm against the official Panchanga once it publishes.
+    # both sources.
+    #
+    # Both of those sources are PROJECTING: npns.gov.np has published through
+    # 2083 only. Expected official determination: Magh 2083 (Jan-Feb 2027).
+    # RE-CONFIRM THIS ROW THEN.
     2084: (31, 31, 32, 31, 31, 30, 30, 30, 29, 30, 30, 30),  # 365
 }
 

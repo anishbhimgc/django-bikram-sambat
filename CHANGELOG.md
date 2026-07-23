@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- **Distinguished the two standards of evidence behind "verified."** The Nepal
+  Panchanga Nirnayak Samiti — the government body under the Ministry of Culture,
+  Tourism and Civil Aviation that determines the calendar — has published through
+  **2083 only**, and approves each year's patro a few months before that year
+  begins. So 1975–2083 rest on two sources deriving from an already-published
+  Panchanga, while **2084 rests on two sources that are both projecting**. It
+  still meets this package's stated bar and ships unchanged, but the row is now
+  flagged in `calendar_data.py` for re-confirmation when the Samiti publishes,
+  expected Magh 2083 (January–February 2027).
+
+  This is also why **2085 is not promoted despite two independent sources
+  agreeing on it exactly.** A full scrape of Hamro Patro's 2085 matches
+  `nepali-datetime` on all twelve months — (31, 32, 31, 32, 30, 31, 30, 30, 29,
+  30, 30, 30), 366 days — against `bikram-sambat` and the built-in predictor,
+  which disagree with both and with each other. But the Samiti has not determined
+  2085, so every source is necessarily projecting, and agreement between
+  projections is not attestation. Hamro Patro is Nepal's most-used calendar and a
+  private company; it follows the Samiti rather than constituting it.
+
 ### Added
 
 - `sources.month_lengths_from_csv()` — derive Bikram Sambat month lengths from

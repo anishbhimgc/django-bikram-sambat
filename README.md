@@ -46,6 +46,29 @@ the Nepali Panchanga. This package ships the years it could **verify against two
 independent sources**: **1975–2084 BS (1918-04-13 – 2028-04-12 AD)**. By default,
 dates outside that range raise `DateOutOfRange` rather than guessing.
 
+**Two kinds of verified, and the difference is worth knowing.** The calendar is
+determined by the [Nepal Panchanga Nirnayak Samiti](https://npns.gov.np/), a
+government body under the Ministry of Culture, Tourism and Civil Aviation, which
+approves each year's patro a few months before that year begins. It has
+published **through 2083**.
+
+| Years | Evidence |
+|---|---|
+| 1975–2083 | two independent sources, both deriving from an **already-published** Panchanga |
+| 2084 | two independent sources that are both **projecting** — no official patro exists yet |
+
+2084 meets this package's stated bar and is shipped on it, but it is not attested
+by the almanac, because the almanac has not been written. Its official
+determination is expected around **Magh 2083 (January–February 2027)**; the row
+is flagged in `calendar_data.py` to be re-confirmed then.
+
+This is also why **2085 is not in the table even though two sources agree on it**.
+Hamro Patro and `nepali-datetime` match exactly on all twelve months of 2085 —
+but the Samiti has not determined that year, so both are necessarily projecting,
+and agreement between projections is not attestation. Note also that Hamro Patro,
+though Nepal's most widely used calendar, is a private company that *follows* the
+Samiti rather than constituting it.
+
 They *can* be approximated by computation — but not exactly, and that gap is the
 whole point. A Surya-Siddhanta model of the sun (the same reckoning the official
 calendar uses) reproduces the verified years to only **~87% of months, the
